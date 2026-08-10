@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #121212;
+            --accent: #b89047;
+            --bg: #fbfbfd;
+            --card-bg: #ffffff;
+            --text-main: #222222;
+            --text-muted: #666666;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f9efe2 0%, var(--bg) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 20px 5%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .auth-page {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            width: min(600px, 100%);
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: block;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .auth-copy {
+            background: linear-gradient(135deg, #1b1b1b 0%, #2d2d2d 100%);
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .auth-copy .eyebrow {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #f2d49b;
+            font-weight: 700;
+        }
+
+        .auth-copy h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            line-height: 1.2;
+        }
+
+        .auth-copy p {
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7;
+        }
+
+        .auth-copy ul {
+            margin-top: 8px;
+            list-style: none;
+            display: grid;
+            gap: 8px;
+        }
+
+        .auth-copy li {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .auth-copy li i {
+            color: var(--accent);
+        }
+
+        .auth-form {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-form h2 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .auth-form .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .form-group input {
+            padding: 12px 14px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 10px;
+            background: #fcfcfc;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 42px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .password-toggle:hover {
+            color: var(--accent);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(184, 144, 71, 0.16);
+        }
+
+        .error-text {
+            min-height: 16px;
+            font-size: 12px;
+            color: #c74b4b;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .checkbox-row input {
+            accent-color: var(--accent);
+        }
+
+        .login-btn {
+            margin-top: 6px;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px rgba(18, 18, 18, 0.12);
+        }
+
+        .login-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(184, 144, 71, 0.24);
+        }
+
+        .form-footer {
+            margin-top: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .form-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .success-message {
+            min-height: 20px;
+            color: #2f8f56;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .custom-alert {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #121212;
+            color: white;
+            padding: 16px 28px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-left: 4px solid var(--accent);
+            animation: slideInUp 0.4s ease;
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 5% 30px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 850px) {
+            .auth-form {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="./index.html" class="logo">Trendy Store<span></span></a>
+    </nav>
+
+    <main class="auth-page">
+        <section class="auth-card">
+            <form id="loginForm" class="auth-form" novalidate>
+                <h2>Login</h2>
+                <p class="subtitle">Please fill in the details below.</p>
+
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input id="fullName" name="fullName" type="text" placeholder="Enter your full name">
+                    <div class="error-text" id="fullNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input id="email" name="email" type="email" placeholder="you@example.com">
+                    <div class="error-text" id="emailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input id="password" name="password" type="password" placeholder="Create a strong password">
+                        <button type="button" class="password-toggle" data-target="password" aria-label="Show password"><i class="far fa-eye"></i></button>
+                    </div>
+                    <div class="error-text" id="passwordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter your password">
+                        <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                    </div>
+                    <div class="error-text" id="confirmPasswordError"></div>
+                </div>
+
+                <label class="checkbox-row">
+                    <input type="checkbox" id="terms" name="terms">
+                    <span>I agree to the privacy policy and terms.</span>
+                </label>
+                <div class="error-text" id="termsError"></div>
+
+                <button type="submit" class="login-btn">Login</button>
+                <p class="form-footer">Return to the store <a href="./index.html">Home</a></p>
+                <div class="success-message" id="successMessage"></div>
+            </form>
+        </section>
+    </main>
+
+    <div class="custom-alert" id="customAlert">
+        <i class="fas fa-info-circle" style="color: var(--accent);"></i>
+        <span id="alertMsg">Message goes here</span>
+    </div>
+
+    <footer>
+        © 2026 Trendy Store Luxury Boutique. All rights reserved.
+    </footer>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const fullName = document.getElementById('fullName');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const terms = document.getElementById('terms');
+        const successMessage = document.getElementById('successMessage');
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+
+        const errors = {
+            fullName: document.getElementById('fullNameError'),
+            email: document.getElementById('emailError'),
+            password: document.getElementById('passwordError'),
+            confirmPassword: document.getElementById('confirmPasswordError'),
+            terms: document.getElementById('termsError')
+        };
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('customAlert');
+            document.getElementById('alertMsg').textContent = message;
+            alertBox.style.display = 'flex';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 2500);
+        }
+
+        function validateField(fieldName) {
+            let message = '';
+
+            if (fieldName === 'fullName') {
+                if (!fullName.value.trim()) {
+                    message = 'Full name is required.';
+                } else if (fullName.value.trim().length < 3) {
+                    message = 'Full name must contain at least 3 characters.';
+                }
+            }
+
+            if (fieldName === 'email') {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email.value.trim()) {
+                    message = 'Email is required.';
+                } else if (!emailPattern.test(email.value.trim())) {
+                    message = 'Please enter a valid email address.';
+                }
+            }
+
+            if (fieldName === 'password') {
+                if (!password.value) {
+                    message = 'Password is required.';
+                } else if (password.value.length < 8) {
+                    message = 'Password must be at least 8 characters.';
+                } else if (!/[A-Z]/.test(password.value) || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
+                    message = 'Password must include an uppercase letter, a number, and a special character.';
+                }
+            }
+
+            if (fieldName === 'confirmPassword') {
+                if (!confirmPassword.value) {
+                    message = 'Please confirm your password.';
+                } else if (confirmPassword.value !== password.value) {
+                    message = 'Passwords do not match.';
+                }
+            }
+
+            if (fieldName === 'terms') {
+                if (!terms.checked) {
+                    message = 'You must agree to the terms and privacy policy.';
+                }
+            }
+
+            errors[fieldName].textContent = message;
+            return !message;
+        }
+
+        [fullName, email, password, confirmPassword].forEach((field) => {
+            field.addEventListener('input', () => {
+                validateField(field.name);
+                if (field.name === 'password' || field.name === 'confirmPassword') {
+                    validateField('confirmPassword');
+                }
+            });
+        });
+
+        passwordToggles.forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.getAttribute('data-target');
+                const targetInput = document.getElementById(targetId);
+                const icon = toggle.querySelector('i');
+
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    targetInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        terms.addEventListener('change', () => validateField('terms'));
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            successMessage.textContent = '';
+
+            const isValid = [
+                validateField('fullName'),
+                validateField('email'),
+                validateField('password'),
+                validateField('confirmPassword'),
+                validateField('terms')
+            ].every(Boolean);
+
+            if (isValid) {
+                const userProfile = {
+                    fullName: fullName.value.trim(),
+                    email: email.value.trim(),
+                    password: password.value
+                };
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                localStorage.setItem('loginSuccessMessage', 'Login successful! Welcome back to Trendy Store.');
+                window.location.href = './index.html?login=success';
+            }
+        });
+    </script>
+</body>
+</html>

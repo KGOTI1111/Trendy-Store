@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #121212;
+            --accent: #b89047;
+            --bg: #fbfbfd;
+            --card-bg: #ffffff;
+            --text-main: #222222;
+            --text-muted: #666666;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: linear-gradient(135deg, #f9efe2 0%, var(--bg) 100%); color: var(--text-main); min-height: 100vh; }
+
+        nav {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(12px);
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--primary); text-decoration: none; letter-spacing: 1px; }
+        .logo span { color: var(--accent); }
+
+        .nav-actions { display: flex; gap: 12px; align-items: center; }
+        .nav-link { text-decoration: none; color: var(--text-main); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; }
+        .nav-link:hover { color: var(--accent); }
+        .profile-chip {
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 999px; background: var(--primary); color: white; text-decoration: none;
+        }
+        .profile-chip span { font-weight: 700; }
+        .profile-avatar {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800;
+        }
+
+        .page { max-width: 1100px; margin: 0 auto; padding: 40px 20px 60px; }
+        .profile-card { background: var(--card-bg); border-radius: 24px; box-shadow: var(--shadow); overflow: hidden; border: 1px solid rgba(0,0,0,0.04); }
+        .profile-header { padding: 32px; background: linear-gradient(135deg, #1b1b1b 0%, #2d2d2d 100%); color: white; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+        .profile-title { display: flex; align-items: center; gap: 16px; }
+        .profile-title .avatar-large { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
+        .profile-title h1 { font-family: 'Playfair Display', serif; font-size: 28px; }
+        .profile-title p { color: rgba(255,255,255,0.8); margin-top: 4px; }
+        .profile-body { padding: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .section-box { background: #fcfcfc; border: 1px solid rgba(0,0,0,0.05); border-radius: 16px; padding: 24px; }
+        .section-box h3 { margin-bottom: 16px; font-size: 18px; }
+        .info-item { margin-bottom: 12px; }
+        .info-item strong { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .info-item span { font-size: 15px; color: var(--text-main); }
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+        .form-group label { font-size: 13px; font-weight: 700; color: var(--text-main); }
+        .form-group input { padding: 12px 14px; border: 1px solid rgba(0,0,0,0.1); border-radius: 10px; background: #fcfcfc; transition: var(--transition); font-size: 14px; }
+        .form-group input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184,144,71,0.16); }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { width: 100%; padding-right: 42px; }
+        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 15px; }
+        .password-toggle:hover { color: var(--accent); }
+        .error-text { min-height: 16px; font-size: 12px; color: #c74b4b; }
+        .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); margin: 8px 0 12px; }
+        .checkbox-row input { accent-color: var(--accent); }
+        .save-btn { padding: 12px 16px; border: none; border-radius: 10px; background: var(--primary); color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: var(--transition); }
+        .save-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        .message { min-height: 18px; margin-top: 8px; font-size: 14px; font-weight: 700; color: #2f8f56; }
+        .custom-alert { position: fixed; bottom: 30px; right: 30px; background: #121212; color: white; padding: 16px 28px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 3000; display: none; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; border-left: 4px solid var(--accent); animation: slideInUp 0.4s ease; }
+        @keyframes slideInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @media (max-width: 850px) {
+            .profile-body { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="./index.html" class="logo">Trendy Store<span></span></a>
+        <div class="nav-actions">
+            <a href="./index.html" class="nav-link">Home</a>
+            <a href="./profile.html" class="profile-chip">
+                <div class="profile-avatar" id="avatarInitial">U</div>
+                <span id="navUserName">User</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="page">
+        <section class="profile-card">
+            <div class="profile-header">
+                <div class="profile-title">
+                    <div class="avatar-large" id="avatarLarge">U</div>
+                    <div>
+                        <h1 id="profileName">User Profile</h1>
+                        <p id="profileEmail">your@email.com</p>
+                    </div>
+                </div>
+                <div class="profile-status">Logged in successfully</div>
+            </div>
+            <div class="profile-body">
+                <div class="section-box">
+                    <h3>Your Details</h3>
+                    <div class="info-item"><strong>Full Name</strong><span id="displayName">-</span></div>
+                    <div class="info-item"><strong>Email</strong><span id="displayEmail">-</span></div>
+                    <div class="info-item"><strong>Password</strong><span>********</span></div>
+                </div>
+                <div class="section-box">
+                    <h3>Edit Profile</h3>
+                    <form id="profileForm" novalidate>
+                        <div class="form-group">
+                            <label for="editFullName">Full Name</label>
+                            <input id="editFullName" name="fullName" type="text">
+                            <div class="error-text" id="fullNameError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">Email Address</label>
+                            <input id="editEmail" name="email" type="email">
+                            <div class="error-text" id="emailError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPassword">Password</label>
+                            <div class="password-wrapper">
+                                <input id="editPassword" name="password" type="password">
+                                <button type="button" class="password-toggle" data-target="editPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                            </div>
+                            <div class="error-text" id="passwordError"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editConfirmPassword">Confirm Password</label>
+                            <div class="password-wrapper">
+                                <input id="editConfirmPassword" name="confirmPassword" type="password">
+                                <button type="button" class="password-toggle" data-target="editConfirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                            </div>
+                            <div class="error-text" id="confirmPasswordError"></div>
+                        </div>
+                        <label class="checkbox-row"><input type="checkbox" id="editTerms" name="terms"><span>I agree to the privacy policy and terms.</span></label>
+                        <div class="error-text" id="termsError"></div>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                        <div class="message" id="formMessage"></div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="custom-alert" id="customAlert">
+        <i class="fas fa-info-circle" style="color: var(--accent);"></i>
+        <span id="alertMsg">Message goes here</span>
+    </div>
+
+    <script>
+        let profileData = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const form = document.getElementById('profileForm');
+        const fullNameInput = document.getElementById('editFullName');
+        const emailInput = document.getElementById('editEmail');
+        const passwordInput = document.getElementById('editPassword');
+        const confirmPasswordInput = document.getElementById('editConfirmPassword');
+        const termsInput = document.getElementById('editTerms');
+        const errors = {
+            fullName: document.getElementById('fullNameError'),
+            email: document.getElementById('emailError'),
+            password: document.getElementById('passwordError'),
+            confirmPassword: document.getElementById('confirmPasswordError'),
+            terms: document.getElementById('termsError')
+        };
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('customAlert');
+            document.getElementById('alertMsg').textContent = message;
+            alertBox.style.display = 'flex';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 2500);
+        }
+
+        function validateField(fieldName) {
+            let message = '';
+            if (fieldName === 'fullName') {
+                if (!fullNameInput.value.trim()) message = 'Full name is required.';
+                else if (fullNameInput.value.trim().length < 3) message = 'Full name must contain at least 3 characters.';
+            }
+            if (fieldName === 'email') {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailInput.value.trim()) message = 'Email is required.';
+                else if (!emailPattern.test(emailInput.value.trim())) message = 'Please enter a valid email address.';
+            }
+            if (fieldName === 'password') {
+                if (!passwordInput.value) message = 'Password is required.';
+                else if (passwordInput.value.length < 8) message = 'Password must be at least 8 characters.';
+                else if (!/[A-Z]/.test(passwordInput.value) || !/[0-9]/.test(passwordInput.value) || !/[^A-Za-z0-9]/.test(passwordInput.value)) {
+                    message = 'Password must include an uppercase letter, a number, and a special character.';
+                }
+            }
+            if (fieldName === 'confirmPassword') {
+                if (!confirmPasswordInput.value) message = 'Please confirm your password.';
+                else if (confirmPasswordInput.value !== passwordInput.value) message = 'Passwords do not match.';
+            }
+            if (fieldName === 'terms') {
+                if (!termsInput.checked) message = 'You must agree to the terms and privacy policy.';
+            }
+            errors[fieldName].textContent = message;
+            return !message;
+        }
+
+        function populateProfile() {
+            profileData = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const fullName = profileData.fullName || 'User';
+            const email = profileData.email || 'your@email.com';
+            document.getElementById('displayName').textContent = fullName;
+            document.getElementById('displayEmail').textContent = email;
+            document.getElementById('profileName').textContent = fullName;
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('navUserName').textContent = fullName.split(' ')[0];
+            document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
+            document.getElementById('avatarLarge').textContent = fullName.charAt(0).toUpperCase();
+            fullNameInput.value = fullName;
+            emailInput.value = email;
+            passwordInput.value = profileData.password || '';
+            confirmPasswordInput.value = profileData.password || '';
+            termsInput.checked = true;
+        }
+
+        [fullNameInput, emailInput, passwordInput, confirmPasswordInput].forEach((field) => {
+            field.addEventListener('input', () => {
+                validateField(field.name);
+                if (field.name === 'password' || field.name === 'confirmPassword') validateField('confirmPassword');
+            });
+        });
+
+        document.querySelectorAll('.password-toggle').forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = toggle.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        termsInput.addEventListener('change', () => validateField('terms'));
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const isValid = [
+                validateField('fullName'),
+                validateField('email'),
+                validateField('password'),
+                validateField('confirmPassword'),
+                validateField('terms')
+            ].every(Boolean);
+            if (isValid) {
+                const updatedProfile = {
+                    fullName: fullNameInput.value.trim(),
+                    email: emailInput.value.trim(),
+                    password: passwordInput.value
+                };
+                localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+                showAlert('Profile updated successfully!');
+                populateProfile();
+                document.getElementById('formMessage').textContent = 'Profile saved successfully.';
+            }
+        });
+
+        populateProfile();
+    </script>
+</body>
+</html>

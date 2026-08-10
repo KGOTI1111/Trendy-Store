@@ -28,6 +28,10 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background-color: var(--bg);
             color: var(--text-main);
@@ -84,6 +88,73 @@
             color: var(--accent);
         }
 
+        .nav-search {
+            flex: 1;
+            max-width: 420px;
+            margin: 0 18px;
+        }
+
+        .nav-search form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 999px;
+            padding: 6px 12px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .nav-search input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            color: var(--text-main);
+            min-width: 130px;
+        }
+
+        .nav-search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .nav-search button {
+            border: none;
+            background: transparent;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-status {
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            margin: 10px auto 0;
+            max-width: 1020px;
+        }
+
+        .nav-login-btn {
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgb(175, 127, 127);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: var(--transition);
+            box-shadow: 0 8px 18px rgba(18, 18, 18, 0.12);
+        }
+
+        .nav-login-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(184, 144, 71, 0.25);
+        }
+
         .nav-icons {
             display: flex;
             gap: 20px;
@@ -91,15 +162,45 @@
             align-items: center;
         }
 
-        .nav-icons i {
+        .nav-icons i,
+        .wishlist-link,
+        .cart-link {
             cursor: pointer;
             transition: var(--transition);
             position: relative;
+            color: var(--text-main);
         }
 
-        .nav-icons i:hover {
+        .nav-icons i:hover,
+        .wishlist-link:hover,
+        .cart-link:hover {
             color: var(--accent);
             transform: translateY(-2px);
+        }
+
+        .wishlist-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .wishlist-link #wishlistCount,
+        .cart-link #cartCount {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background: var(--accent);
+            color: white;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            font-weight: 700;
         }
 
         /* --- Hero Billboard --- */
@@ -159,6 +260,39 @@
             background: #fff;
             border: 1px solid rgba(184, 144, 71, 0.2);
             z-index: 1;
+        }
+
+        .hero-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.92);
+            color: var(--primary);
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.16);
+            transition: var(--transition);
+            z-index: 3;
+        }
+
+        .hero-arrow:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .hero-arrow-left {
+            left: 18px;
+        }
+
+        .hero-arrow-right {
+            right: 18px;
         }
 
         .hero-slide {
@@ -251,6 +385,18 @@
             padding: 0 5% 60px;
             max-width: 1400px;
             margin: 0 auto;
+            scroll-margin-top: 100px;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .product-grid.filter-active {
+            animation: categoryPulse 0.45s ease;
+        }
+
+        @keyframes categoryPulse {
+            0% { transform: scale(0.98); box-shadow: 0 0 0 rgba(184, 144, 71, 0.1); }
+            50% { transform: scale(1.01); box-shadow: 0 0 20px rgba(184, 144, 71, 0.12); }
+            100% { transform: scale(1); box-shadow: none; }
         }
 
         /* --- Product Card (Premium Hover Dynamics) --- */
@@ -710,15 +856,31 @@
     <nav>
         <a href="./index.html" class="logo">Trendy Store<span></span></a>
         <ul class="menu-links">
-            <li><a href="#" onclick="filterProducts('all')">All Prodcuts</a></li>
+            <li><a href="#" onclick="filterProducts('all')">All Products</a></li>
             <li><a href="./About%20Us.html">About Us</a></li>
             <li><a href="./Contactus.html">Contact Us</a></li>
             <li><a href="./InquiryMenu.html">Inquiry Here</a></li>
+            <li><a id="navLoginLink" href="./login.html" class="nav-login-btn">Login</a></li>
         </ul>
+        <div class="nav-search">
+            <form id="searchForm">
+                <input id="searchInput" type="search" placeholder="Search products, brands, details..." aria-label="Search products">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
         <div class="nav-icons">
-            <i class="fas fa-search" onclick="showAlert('Search bar activated')"></i>
-            <i class="far fa-heart" onclick="showAlert('Bespoke Wishlist loading...')"></i>
-            <i class="fas fa-shopping-bag" onclick="showAlert('Your Orders Vault is empty')"></i>
+            <a href="./wishlist.html" class="wishlist-link" title="Wishlist">
+                <i class="far fa-heart"></i>
+                <span id="wishlistCount">0</span>
+            </a>
+            <a href="./addtocard.html" class="cart-link" title="Cart">
+                <i class="fas fa-shopping-bag"></i>
+                <span id="cartCount">0</span>
+            </a>
+            <a href="./profile.html" class="nav-profile-link" style="display:none;align-items:center;gap:8px;text-decoration:none;color:var(--text-main);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;">
+                <span style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;" id="homeProfileInitial">U</span>
+                <span id="homeProfileName">User</span>
+            </a>
         </div>
     </nav>
 
@@ -729,6 +891,8 @@
             <h1>Crafted For Elegance</h1>
         </div>
         <div class="hero-slider" id="heroSlider">
+            <button class="hero-arrow hero-arrow-left" type="button" onclick="prevHeroSlide()">‹</button>
+            <button class="hero-arrow hero-arrow-right" type="button" onclick="nextHeroSlide()">›</button>
             <div class="hero-slide active">
                 <img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200" alt="Luxury watch" onclick="goToCategory('Watch')">
                 <button class="slide-label" type="button" data-category="Watch" onclick="goToCategory(this.dataset.category)">Watch</button>
@@ -744,6 +908,8 @@
         </div>
     </section>
 
+    <div class="search-status" id="searchStatus"></div>
+
     <!-- Subcategories filter navigation -->
     <div class="category-filter">
         <button class="filter-btn active" data-category="all" onclick="filterProducts('all')">All Products</button>
@@ -753,9 +919,11 @@
     </div>
 
     <!-- Product Display Area -->
-    <div class="product-grid" id="productGrid">
-        <!-- Javascript dynamic rendering -->
-    </div>
+    <section id="productsSection">
+        <div class="product-grid" id="productGrid">
+            <!-- Javascript dynamic rendering -->
+        </div>
+    </section>
 
     <!-- Product Detail Modal (Dynamic Switcher integrated) -->
     <div class="modal" id="productModal">
@@ -805,6 +973,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             displayProducts();
+            updateWishlistCount();
+            updateCartCount();
+            setupSearch();
+            updateLoginVisibility();
         });
 
         // Highly Curated 15 Product Database (5 Watches, 5 Goggles, 5 Perfumes)
@@ -936,7 +1108,7 @@
             // PERFUMES
             { 
                 id: 11, 
-                name: "Oud Absolute Royal", 
+                name: "Creed Aventus for Men Eau De Parfum Spray 100ml", 
                 category: "Perfume", 
                 price: 21500, 
                 sales: "900", 
@@ -952,7 +1124,7 @@
             },
             { 
                 id: 12, 
-                name: "Blossom Jasmine Mist", 
+                name: "YSL* Saintt Laurentt Libre Eau De perfume (90ml)", 
                 category: "Perfume", 
                 price: 6999, 
                 sales: "4,000", 
@@ -968,7 +1140,7 @@
             },
             { 
                 id: 13, 
-                name: "Citrus Bergamot Infusion", 
+                name: "Guccii Flora Gorgeous Gardeniiaa Women", 
                 category: "Perfume", 
                 price: 5999, 
                 sales: "2,500", 
@@ -983,7 +1155,7 @@
             },
             { 
                 id: 14, 
-                name: "Amber Velvet Night", 
+                name: "Azzaroo The Most Wanted Unisex Perfume (100 ml)", 
                 category: "Perfume", 
                 price: 15999, 
                 sales: "1,300", 
@@ -1013,11 +1185,7 @@
         function resolveImageUrl(url) {
             if (!url) return fallbackImage;
             if (/^(https?:)?\/\//i.test(url) || url.startsWith('data:')) return url;
-            try {
-                return new URL(url, window.location.href).href;
-            } catch (error) {
-                return url;
-            }
+            return url;
         }
 
         // Render dynamic product list
@@ -1028,7 +1196,7 @@
             const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
             
             filtered.forEach(p => {
-                const imageSrc = resolveImageUrl(p.img);
+                        const imageSrc = p.img || fallbackImage;
                 grid.innerHTML += `
                     <div class="product-card" onclick="openModal(${p.id})">
                         <div class="product-img-wrapper">
@@ -1118,17 +1286,183 @@
             }, 3000);
         }
 
+        function getWishlist() {
+            return JSON.parse(localStorage.getItem('wishlist') || '[]');
+        }
+
+        function saveWishlist(list) {
+            localStorage.setItem('wishlist', JSON.stringify(list));
+            updateWishlistCount();
+        }
+
+        function updateWishlistCount() {
+            const count = getWishlist().length;
+            const countEl = document.getElementById('wishlistCount');
+            if (countEl) countEl.textContent = count;
+        }
+
+        function getCart() {
+            return JSON.parse(localStorage.getItem('cart') || '[]');
+        }
+
+        function saveCart(list) {
+            localStorage.setItem('cart', JSON.stringify(list));
+            updateCartCount();
+        }
+
+        function updateCartCount() {
+            const count = getCart().length;
+            const countEl = document.getElementById('cartCount');
+            if (countEl) countEl.textContent = count;
+        }
+
+        function updateSearchStatus(query) {
+            const status = document.getElementById('searchStatus');
+            if (!status) return;
+            const trimmed = query.trim();
+            status.textContent = trimmed ? `Showing results for "${trimmed}"` : '';
+            
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchForm = document.getElementById('searchForm');
+            const lastSearch = localStorage.getItem('lastSearch') || '';
+            if (searchInput) searchInput.value = lastSearch;
+            if (lastSearch) {
+                searchProducts(lastSearch, false);
+            }
+            if (searchForm) {
+                searchForm.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    const query = searchInput.value.trim();
+                    searchProducts(query, true);
+                });
+                
+            }
+        }
+
+        function focusSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.focus();
+        }
+
+        function updateLoginVisibility() {
+            const loginLink = document.getElementById('navLoginLink');
+            const profileLink = document.querySelector('.nav-profile-link');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (userProfile.fullName) {
+                if (loginLink) loginLink.style.display = 'none';
+                if (profileLink) profileLink.style.display = 'flex';
+            } else {
+                if (loginLink) loginLink.style.display = 'inline-flex';
+                if (profileLink) profileLink.style.display = 'none';
+            }
+        }
+
+        function addToCart(product) {
+            if (!product || !product.id) return;
+            const cart = getCart();
+            if (cart.some(item => item.id === product.id)) {
+                showAlert(`"${product.name}" is already in your cart.`);
+                return;
+            }
+            cart.push(product);
+            saveCart(cart);
+            showAlert(`"${product.name}" added to your cart.`);
+        }
+
+        function addToWishlist(product) {
+            if (!product || !product.id) return;
+            const wishlist = getWishlist();
+            if (wishlist.some(item => item.id === product.id)) {
+                showAlert(`"${product.name}" is already in your Wishlist.`);
+                closeModal();
+                return;
+            }
+            wishlist.push(product);
+            saveWishlist(wishlist);
+            showAlert(`"${product.name}" added to your Wishlist.`);
+            closeModal();
+        }
+
+        const loginSuccessMessage = localStorage.getItem('loginSuccessMessage');
+        const storedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        if (storedProfile.fullName) {
+            const initial = storedProfile.fullName.charAt(0).toUpperCase();
+            const nameEl = document.getElementById('homeProfileName');
+            const initialEl = document.getElementById('homeProfileInitial');
+            if (nameEl) nameEl.textContent = storedProfile.fullName.split(' ')[0];
+            if (initialEl) initialEl.textContent = initial;
+        }
+        if (loginSuccessMessage) {
+            window.addEventListener('load', () => {
+                showAlert(loginSuccessMessage);
+                localStorage.removeItem('loginSuccessMessage');
+            });
+        }
+
         // Trigger e-commerce button metrics with alert message
         function triggerAction(actionType) {
-            if(!currentProduct) return;
-            if(actionType === 'Purchase') {
+            if (!currentProduct) return;
+            if (actionType === 'Purchase') {
                 showAlert(`Processing premium transaction for ${currentProduct.name} at ${formatRupee(currentProduct.price)}.`);
             } else if (actionType === 'Cart') {
-                showAlert(`Successfully added "${currentProduct.name}" to your cart.`);
+                addToCart(currentProduct);
+            } else if (actionType === 'Wishlist') {
+                addToWishlist(currentProduct);
             } else {
-                showAlert(`"${currentProduct.name}" added to your custom Wishlist.`);
+                closeModal();
             }
-            closeModal();
+        }
+
+        function searchProducts(query, save = true) {
+            const normalized = query.trim().toLowerCase();
+            if (save) localStorage.setItem('lastSearch', query);
+            updateSearchStatus(query);
+            if (!normalized) {
+                displayProducts();
+                return;
+            }
+            const filtered = products.filter(product => {
+                return [product.name, product.desc, product.category, product.review]
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(normalized);
+            });
+            if (!filtered.length) {
+                showAlert(`No products found for "${query}".`);
+            }
+            renderProducts(filtered);
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            if (!items.length) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color: var(--text-muted);">No products match your search or filter.</p>';
+                return;
+            }
+            items.forEach(p => {
+                const imageSrc = p.img || fallbackImage;
+                grid.innerHTML += `
+                    <div class="product-card" onclick="openModal(${p.id})">
+                        <div class="product-img-wrapper">
+                            <span class="badge-category">${p.category}</span>
+                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
+                        </div>
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <div class="price">${formatRupee(p.price)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function displayProducts(filter = 'all') {
+            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+            renderProducts(filtered);
         }
 
         // Initialize application products
@@ -1148,11 +1482,31 @@
             });
         }
 
+        function prevHeroSlide() {
+            heroIndex = (heroIndex - 1 + heroSlides.length) % heroSlides.length;
+            showHeroSlide(heroIndex);
+        }
+
+        function nextHeroSlide() {
+            heroIndex = (heroIndex + 1) % heroSlides.length;
+            showHeroSlide(heroIndex);
+        }
+
         function filterProducts(category) {
             const normalizedCategory = categoryMap[category] || category;
             displayProducts(normalizedCategory);
             const filterButtons = document.querySelectorAll('.filter-btn');
             filterButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.category === normalizedCategory));
+
+            const productGrid = document.getElementById('productGrid');
+            productGrid.classList.remove('filter-active');
+            void productGrid.offsetWidth;
+            productGrid.classList.add('filter-active');
+
+            document.getElementById('productsSection').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
 
         function goToCategory(category) {
