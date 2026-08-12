@@ -1228,26 +1228,8 @@
 
         // Render dynamic product list
         function displayProducts(filter = 'all') {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = '';
-            
             const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
-            
-            filtered.forEach(p => {
-                        const imageSrc = p.img || fallbackImage;
-                grid.innerHTML += `
-                    <div class="product-card" onclick="openModal(${p.id})">
-                        <div class="product-img-wrapper">
-                            <span class="badge-category">${p.category}</span>
-                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
-                        </div>
-                        <div class="product-info">
-                            <h3>${p.name}</h3>
-                            <div class="price">${formatRupee(p.price)}</div>
-                        </div>
-                    </div>
-                `;
-            });
+            renderProducts(filtered);
         }
 
         // Filter active toggler actions
@@ -1482,12 +1464,12 @@
                 return;
             }
             items.forEach(p => {
-                const imageSrc = p.img || fallbackImage;
+                const imageSrc = resolveImageUrl(p.img || fallbackImage);
                 grid.innerHTML += `
                     <div class="product-card" onclick="openModal(${p.id})">
                         <div class="product-img-wrapper">
                             <span class="badge-category">${p.category}</span>
-                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
+                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; setImageFallback(this, '${imageSrc}');">
                         </div>
                         <div class="product-info">
                             <h3>${p.name}</h3>
