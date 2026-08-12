@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="./">
     <title>Trendy Store | Premium E-Commerce</title>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1182,10 +1183,47 @@
 
         const fallbackImage = 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200';
 
+        const categoryFallbacks = {
+            Watch: [
+                'https://placehold.co/520x400/121212/b89047?text=Watch+1',
+                'https://placehold.co/520x400/121212/b89047?text=Watch+2',
+                'https://placehold.co/520x400/121212/b89047?text=Watch+3',
+                'https://placehold.co/520x400/121212/b89047?text=Watch+4'
+            ],
+            Goggle: [
+                'https://placehold.co/520x400/121212/b89047?text=Goggle+1',
+                'https://placehold.co/520x400/121212/b89047?text=Goggle+2',
+                'https://placehold.co/520x400/121212/b89047?text=Goggle+3',
+                'https://placehold.co/520x400/121212/b89047?text=Goggle+4'
+            ],
+            Perfume: [
+                'https://placehold.co/520x400/121212/b89047?text=Perfume+1',
+                'https://placehold.co/520x400/121212/b89047?text=Perfume+2',
+                'https://placehold.co/520x400/121212/b89047?text=Perfume+3',
+                'https://placehold.co/520x400/121212/b89047?text=Perfume+4'
+            ]
+        };
+
+        function getFallbackForPath(originalUrl) {
+            if (!originalUrl) return fallbackImage;
+            const match = originalUrl.match(/img\/([^\/]+)\//i);
+            if (!match) return fallbackImage;
+            const category = match[1];
+            const fallbackList = categoryFallbacks[category];
+            if (!fallbackList) return fallbackImage;
+            const idMatch = originalUrl.match(/\/(\d+)\//);
+            const index = idMatch ? Number(idMatch[1]) - 1 : 0;
+            return fallbackList[index] || fallbackImage;
+        }
+
+        function setImageFallback(imgElement, originalUrl) {
+            imgElement.src = getFallbackForPath(originalUrl);
+        }
+
         function resolveImageUrl(url) {
             if (!url) return fallbackImage;
             if (/^(https?:)?\/\//i.test(url) || url.startsWith('data:')) return url;
-            return url;
+            return new URL(url, window.location.href).href;
         }
 
         // Render dynamic product list
