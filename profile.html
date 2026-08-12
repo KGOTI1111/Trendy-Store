@@ -104,6 +104,7 @@
                     </div>
                 </div>
                 <div class="profile-status">Logged in successfully</div>
+                <button class="save-btn" id="logoutBtn" type="button">Logout</button>
             </div>
             <div class="profile-body">
                 <div class="section-box">
@@ -226,6 +227,11 @@
             termsInput.checked = true;
         }
 
+        function logoutUser() {
+            localStorage.removeItem('userProfile');
+            window.location.href = './login.html';
+        }
+
         [fullNameInput, emailInput, passwordInput, confirmPasswordInput].forEach((field) => {
             field.addEventListener('input', () => {
                 validateField(field.name);
@@ -274,6 +280,7 @@
             }
         });
 
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
         populateProfile();
     </script>
 </body>

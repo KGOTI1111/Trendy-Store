@@ -189,6 +189,14 @@
       transform: translateY(-1px);
     }
 
+    .error-text {
+      color: #c74b4b;
+      font-size: 0.95rem;
+      min-height: 18px;
+      margin-top: -14px;
+      margin-bottom: 14px;
+    }
+
     .back-link {
       display: inline-block;
       margin-top: 24px;
@@ -234,12 +242,13 @@
         <input id="inquiry-name" type="text" placeholder="Your full name" required autocomplete="name" />
 
         <label for="inquiry-email">Email</label>
-        <input id="inquiry-email" type="email" placeholder="you@example.com" required autocomplete="email"
+        <input id="inquiry-email" type="email" placeholder="you@gmail.com" required autocomplete="email"
           pattern="^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$"
           title="Enter a valid email, such as user@gmail.com or user@example.co.in" />
+        <div class="error-text" id="inquiryEmailError"></div>
 
         <label for="inquiry-phone">Phone</label>
-        <input id="inquiry-phone" type="tel" placeholder="+91 90162 69623" pattern="^\+?[0-9\s\-]{10,18}$" required title="Enter a valid phone number with 10 to 18 digits, optional +." />
+        <input id="inquiry-phone" type="tel" placeholder="+91 9078* *****" pattern="^\+?[0-9\s\-]{10,18}$" required title="Enter a valid phone number with 10 to 18 digits, optional +." />
 
         <label for="inquiry-type">Inquiry Type</label>
         <select id="inquiry-type" required>
@@ -253,6 +262,7 @@
 
         <label for="inquiry-message">Message</label>
         <textarea id="inquiry-message" placeholder="Tell us how we can assist you" required></textarea>
+        <div class="error-text" id="inquiryMessageError"></div>
 
         <button class="btn-submit" type="submit">Submit Inquiry</button>
       </form>
@@ -270,19 +280,63 @@
   </div>
 
   <script>
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function isLoggedIn() {
+      return Boolean(JSON.parse(localStorage.getItem('userProfile') || '{}').fullName);
+    }
+
+    function redirectToLoginWithReturnUrl() {
+      const returnUrl = encodeURIComponent(window.location.href);
+      window.location.href = `./login.html?returnUrl=${returnUrl}`;
+    }
+
+    function clearInquiryErrors() {
+      document.getElementById('inquiryEmailError').textContent = '';
+      document.getElementById('inquiryMessageError').textContent = '';
+    }
+
+    function validateInquiryForm(email, message) {
+      clearInquiryErrors();
+      let isValid = true;
+
+      if (!email) {
+        document.getElementById('inquiryEmailError').textContent = 'Email is required.';
+        isValid = false;
+      } else if (!emailPattern.test(email)) {
+        document.getElementById('inquiryEmailError').textContent = 'Please enter a valid email address.';
+        isValid = false;
+      }
+
+      if (!message) {
+        document.getElementById('inquiryMessageError').textContent = 'Please describe your inquiry.';
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
     function handleSubmitInquiry(event) {
       event.preventDefault();
 
-      const form = document.getElementById('inquiryForm');
-      if (!form.checkValidity()) {
-        form.reportValidity();
+      const emailField = document.getElementById('inquiry-email');
+      const messageField = document.getElementById('inquiry-message');
+      const email = emailField.value.trim();
+      const message = messageField.value.trim();
+
+      if (!validateInquiryForm(email, message)) {
+        return;
+      }
+
+      if (!isLoggedIn()) {
+        redirectToLoginWithReturnUrl();
         return;
       }
 
       const inquiryPopup = document.getElementById('inquiryPopup');
       inquiryPopup.style.display = 'flex';
 
-      form.reset();
+      document.getElementById('inquiryForm').reset();
     }
 
     function closeInquiryPopup() {

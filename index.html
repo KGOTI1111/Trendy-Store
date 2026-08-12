@@ -978,6 +978,7 @@
             updateCartCount();
             setupSearch();
             updateLoginVisibility();
+            handlePendingActionAfterLogin();
         });
 
         // Highly Curated 15 Product Database (5 Watches, 5 Goggles, 5 Perfumes)
@@ -1228,8 +1229,26 @@
 
         // Render dynamic product list
         function displayProducts(filter = 'all') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            
             const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
-            renderProducts(filtered);
+            
+            filtered.forEach(p => {
+                        const imageSrc = p.img || fallbackImage;
+                grid.innerHTML += `
+                    <div class="product-card" onclick="openModal(${p.id})">
+                        <div class="product-img-wrapper">
+                            <span class="badge-category">${p.category}</span>
+                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
+                        </div>
+                        <div class="product-info">
+                            <h3>${p.name}</h3>
+                            <div class="price">${formatRupee(p.price)}</div>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         // Filter active toggler actions
@@ -1380,8 +1399,30 @@
             }
         }
 
+        function getUserProfile() {
+            return JSON.parse(localStorage.getItem('userProfile') || '{}');
+        }
+
+        function isLoggedIn() {
+            return Boolean(getUserProfile().fullName);
+        }
+
+        function redirectToLoginForAction(action, productId) {
+            const returnUrl = encodeURIComponent(window.location.href);
+            const params = new URLSearchParams({
+                returnUrl,
+                action,
+                productId: String(productId)
+            });
+            window.location.href = `./login.html?${params.toString()}`;
+        }
+
         function addToCart(product) {
             if (!product || !product.id) return;
+            if (!isLoggedIn()) {
+                redirectToLoginForAction('Cart', product.id);
+                return;
+            }
             const cart = getCart();
             if (cart.some(item => item.id === product.id)) {
                 showAlert(`"${product.name}" is already in your cart.`);
@@ -1394,6 +1435,10 @@
 
         function addToWishlist(product) {
             if (!product || !product.id) return;
+            if (!isLoggedIn()) {
+                redirectToLoginForAction('Wishlist', product.id);
+                return;
+            }
             const wishlist = getWishlist();
             if (wishlist.some(item => item.id === product.id)) {
                 showAlert(`"${product.name}" is already in your Wishlist.`);
@@ -1422,9 +1467,37 @@
             });
         }
 
+        function handlePendingActionAfterLogin() {
+            const params = new URLSearchParams(window.location.search);
+            const action = params.get('action');
+            const productId = params.get('productId');
+            const login = params.get('login');
+            if (!login || login !== 'success' || !action || !productId || !isLoggedIn()) return;
+            const product = products.find(p => String(p.id) === productId);
+            if (!product) return;
+
+            if (action === 'Cart') {
+                addToCart(product);
+            } else if (action === 'Wishlist') {
+                addToWishlist(product);
+            } else if (action === 'Purchase') {
+                showAlert(`Welcome back! You can now complete the purchase for ${product.name}.`);
+            }
+
+            params.delete('login');
+            params.delete('action');
+            params.delete('productId');
+            const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+            window.history.replaceState({}, '', newUrl);
+        }
+
         // Trigger e-commerce button metrics with alert message
         function triggerAction(actionType) {
             if (!currentProduct) return;
+            if (!isLoggedIn()) {
+                redirectToLoginForAction(actionType === 'Purchase' ? 'Purchase' : actionType, currentProduct.id);
+                return;
+            }
             if (actionType === 'Purchase') {
                 showAlert(`Processing premium transaction for ${currentProduct.name} at ${formatRupee(currentProduct.price)}.`);
             } else if (actionType === 'Cart') {
@@ -1464,12 +1537,12 @@
                 return;
             }
             items.forEach(p => {
-                const imageSrc = resolveImageUrl(p.img || fallbackImage);
+                const imageSrc = p.img || fallbackImage;
                 grid.innerHTML += `
                     <div class="product-card" onclick="openModal(${p.id})">
                         <div class="product-img-wrapper">
                             <span class="badge-category">${p.category}</span>
-                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; setImageFallback(this, '${imageSrc}');">
+                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
                         </div>
                         <div class="product-info">
                             <h3>${p.name}</h3>

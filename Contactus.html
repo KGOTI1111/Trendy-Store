@@ -110,6 +110,14 @@
       min-height: 160px;
     }
 
+    .error-text {
+      color: #c74b4b;
+      font-size: 0.95rem;
+      min-height: 18px;
+      margin-top: -14px;
+      margin-bottom: 14px;
+    }
+
     .btn-submit {
       display: inline-flex;
       align-items: center;
@@ -222,13 +230,16 @@
       <div class="contact-form">
         <h2>Send a Message</h2>
         <label for="name">Name</label>
-        <input id="name" type="text" placeholder="Your full name" />
+        <input id="name" type="text" placeholder="Your full name" required />
+        <div class="error-text" id="nameError"></div>
 
         <label for="email">Email</label>
-        <input id="email" type="email" placeholder="you@example.com" />
+        <input id="email" type="email" placeholder="you@example.com" required />
+        <div class="error-text" id="emailError"></div>
 
         <label for="message">Message</label>
-        <textarea id="message" placeholder="Your question or request"></textarea>
+        <textarea id="message" placeholder="Your question or request" required></textarea>
+        <div class="error-text" id="messageError"></div>
 
         <button class="btn-submit" type="button" onclick="submitContactMessage()">Send Message</button>
       </div>
@@ -246,10 +257,65 @@
   </div>
 
   <script>
+    const contactEmailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function isLoggedIn() {
+      return Boolean(JSON.parse(localStorage.getItem('userProfile') || '{}').fullName);
+    }
+
+    function redirectToLoginWithReturnUrl() {
+      const returnUrl = encodeURIComponent(window.location.href);
+      window.location.href = `./login.html?returnUrl=${returnUrl}`;
+    }
+
+    function clearContactErrors() {
+      document.getElementById('nameError').textContent = '';
+      document.getElementById('emailError').textContent = '';
+      document.getElementById('messageError').textContent = '';
+    }
+
+    function validateContactForm(name, email, message) {
+      clearContactErrors();
+      let isValid = true;
+
+      if (!name) {
+        document.getElementById('nameError').textContent = 'Name is required.';
+        isValid = false;
+      }
+
+      if (!email) {
+        document.getElementById('emailError').textContent = 'Email is required.';
+        isValid = false;
+      } else if (!contactEmailPattern.test(email)) {
+        document.getElementById('emailError').textContent = 'Please enter a valid email address.';
+        isValid = false;
+      }
+
+      if (!message) {
+        document.getElementById('messageError').textContent = 'Message cannot be empty.';
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
     function submitContactMessage() {
       const nameField = document.getElementById('name');
       const emailField = document.getElementById('email');
       const messageField = document.getElementById('message');
+
+      const name = nameField.value.trim();
+      const email = emailField.value.trim();
+      const message = messageField.value.trim();
+
+      if (!validateContactForm(name, email, message)) {
+        return;
+      }
+
+      if (!isLoggedIn()) {
+        redirectToLoginWithReturnUrl();
+        return;
+      }
 
       nameField.value = '';
       emailField.value = '';
