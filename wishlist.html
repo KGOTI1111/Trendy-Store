@@ -118,7 +118,12 @@
             }
             cart.push(product);
             saveCart(cart);
-            showAlert(`"${product.name}" has been added to your cart.`);
+            // Remove product from wishlist
+            removeFromWishlist(product.id);
+            // Redirect to cart page
+            setTimeout(() => {
+                window.location.href = './addtocard.html';
+            }, 500);
         }
 
         function removeFromWishlist(id) {

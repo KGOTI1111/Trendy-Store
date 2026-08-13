@@ -377,22 +377,43 @@
         function getLoginRedirectParams() {
             const params = new URLSearchParams(window.location.search);
             return {
-                returnUrl: params.get('returnUrl') || './index.html?login=success',
+                returnUrl: params.get('returnUrl') || './index.html',
                 action: params.get('action') || '',
                 productId: params.get('productId') || ''
             };
+        }
+
+        function resolveRedirectUrl(rawUrl) {
+            try {
+                return new URL(rawUrl, window.location.href).toString();
+            } catch (error) {
+                return new URL('./index.html', window.location.href).toString();
+            }
         }
 
         function setLoginSuccessRedirect(userProfile) {
             const { returnUrl, action, productId } = getLoginRedirectParams();
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             localStorage.setItem('loginSuccessMessage', 'Login successful! Welcome back to Trendy Store.');
-            const redirectUrl = new URL(returnUrl, window.location.origin);
+
+            const redirectUrl = new URL(resolveRedirectUrl(returnUrl));
             if (action) redirectUrl.searchParams.set('action', action);
             if (productId) redirectUrl.searchParams.set('productId', productId);
             redirectUrl.searchParams.set('login', 'success');
             window.location.href = redirectUrl.toString();
         }
+
+        function redirectLoggedInUserAway() {
+            const existingUser = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const params = new URLSearchParams(window.location.search);
+            const hasReturnUrl = Boolean(params.get('returnUrl'));
+
+            if (existingUser.fullName && !hasReturnUrl) {
+                window.location.href = './index.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', redirectLoggedInUserAway);
 
         function validateField(fieldName) {
             let message = '';

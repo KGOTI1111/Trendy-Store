@@ -229,7 +229,8 @@
 
         function logoutUser() {
             localStorage.removeItem('userProfile');
-            window.location.href = './login.html';
+            localStorage.removeItem('loginSuccessMessage');
+            window.location.href = './index.html';
         }
 
         [fullNameInput, emailInput, passwordInput, confirmPasswordInput].forEach((field) => {

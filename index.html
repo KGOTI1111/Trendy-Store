@@ -1417,6 +1417,13 @@
             window.location.href = `./login.html?${params.toString()}`;
         }
 
+        function prepareBuyNow(product) {
+            if (!product || !product.id) return;
+            localStorage.setItem('buyNowItems', JSON.stringify([product]));
+            localStorage.setItem('buyNowMode', 'single');
+            window.location.href = './buynow.html';
+        }
+
         function addToCart(product) {
             if (!product || !product.id) return;
             if (!isLoggedIn()) {
@@ -1481,7 +1488,7 @@
             } else if (action === 'Wishlist') {
                 addToWishlist(product);
             } else if (action === 'Purchase') {
-                showAlert(`Welcome back! You can now complete the purchase for ${product.name}.`);
+                prepareBuyNow(product);
             }
 
             params.delete('login');
@@ -1499,7 +1506,7 @@
                 return;
             }
             if (actionType === 'Purchase') {
-                showAlert(`Processing premium transaction for ${currentProduct.name} at ${formatRupee(currentProduct.price)}.`);
+                prepareBuyNow(currentProduct);
             } else if (actionType === 'Cart') {
                 addToCart(currentProduct);
             } else if (actionType === 'Wishlist') {

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Checkout</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #121212;
+            --accent: #b89047;
+            --bg: #fbfbfd;
+            --card-bg: #ffffff;
+            --text-main: #222222;
+            --text-muted: #666666;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --success: #28a745;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: linear-gradient(135deg, #f9efe2 0%, var(--bg) 100%); color: var(--text-main); min-height: 100vh; }
+        nav { background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .logo { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--primary); text-decoration: none; letter-spacing: 1px; }
+        .logo span { color: var(--accent); }
+        .nav-links { display: flex; gap: 16px; align-items: center; }
+        .nav-links a { color: var(--text-main); text-decoration: none; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-links a:hover { color: var(--accent); }
+        .page { max-width: 1200px; margin: 0 auto; padding: 40px 20px 60px; }
+        .page h1 { font-family: 'Playfair Display', serif; font-size: 36px; margin-bottom: 10px; }
+        .page p { color: var(--text-muted); margin-bottom: 30px; }
+        .checkout-container { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .checkout-form { background: var(--card-bg); border-radius: 22px; padding: 32px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.06); }
+        .form-section { margin-bottom: 32px; }
+        .form-section h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--accent); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; transition: var(--transition); }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184, 144, 71, 0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .order-summary { background: var(--card-bg); border-radius: 22px; padding: 24px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.06); height: fit-content; position: sticky; top: 80px; }
+        .order-summary h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+        .summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item span:first-child { color: var(--text-muted); }
+        .summary-item span:last-child { font-weight: 600; }
+        .summary-total { display: flex; justify-content: space-between; padding: 16px 0; margin-top: 12px; border-top: 2px solid var(--accent); font-size: 18px; font-weight: 700; }
+        .cart-items { margin-bottom: 20px; }
+        .mini-product { display: flex; gap: 12px; padding: 12px; background: #f9f9f9; border-radius: 8px; margin-bottom: 8px; }
+        .mini-product img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+        .mini-product-info { flex: 1; font-size: 12px; }
+        .mini-product-info h4 { margin: 0 0 4px; font-size: 12px; font-weight: 600; }
+        .mini-product-info p { color: var(--text-muted); margin: 0; }
+        .checkout-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: var(--transition); margin-top: 20px; }
+        .checkout-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .payment-methods { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+        .method-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f5f5f5; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); font-weight: 600; color: var(--text-main); }
+        .method-option input { accent-color: var(--accent); }
+        .qr-box { margin-top: 18px; background: #fafafa; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+        .qr-box img { width: 220px; height: 220px; border-radius: 14px; background: white; padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .upi-link { display: inline-block; text-decoration: none; color: var(--accent); font-weight: 700; margin-top: 4px; }
+        .cod-notice { margin-top: 12px; padding: 12px 14px; border-radius: 10px; background: #f4f4f4; color: var(--text-main); font-size: 13px; }
+        .success-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 5000; align-items: center; justify-content: center; }
+        .success-modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 22px; padding: 40px; text-align: center; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal-content .icon { font-size: 60px; color: var(--success); margin-bottom: 16px; }
+        .modal-content h2 { font-size: 24px; margin-bottom: 12px; }
+        .modal-content p { color: var(--text-muted); margin-bottom: 24px; }
+        .modal-btn { padding: 12px 28px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .modal-btn:hover { background: var(--accent); }
+        .empty-cart { text-align: center; padding: 40px; }
+        .custom-alert { position: fixed; bottom: 30px; right: 30px; background: #121212; color: white; padding: 16px 28px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 3000; display: none; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; border-left: 4px solid var(--accent); animation: slideInUp 0.4s ease; }
+        @keyframes slideInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @media (max-width: 900px) { .checkout-container { grid-template-columns: 1fr; } .order-summary { position: static; } }
+        @media (max-width: 760px) { .form-row { grid-template-columns: 1fr; } .page { padding: 20px 15px 40px; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="./index.html" class="logo">Trendy Store<span></span></a>
+        <div class="nav-links">
+            <a href="./index.html">Home</a>
+            <a href="./addtocard.html">Cart</a>
+            <a href="./profile.html">Profile</a>
+        </div>
+    </nav>
+
+    <main class="page">
+        <h1>Checkout</h1>
+        <p>Complete your purchase below. Fill in your details and review your order.</p>
+
+        <div id="cartEmptyMessage" class="empty-cart" style="display:none;">
+            <h2>Your cart is empty</h2>
+            <p>Add products to your cart before proceeding to checkout.</p>
+            <button class="checkout-btn" onclick="window.location.href='./index.html'" style="max-width: 200px; margin: 20px auto 0;">Continue Shopping</button>
+        </div>
+
+        <div id="checkoutSection" class="checkout-container" style="display:none;">
+            <!-- Left: Checkout Form -->
+            <div class="checkout-form">
+                <!-- Delivery Address -->
+                <div class="form-section">
+                    <h2><i class="fas fa-map-marker-alt" style="margin-right: 8px; color: var(--accent);"></i>Delivery Address</h2>
+                    <div class="form-group">
+                        <label for="fullname">Full Name *</label>
+                        <input type="text" id="fullname" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" placeholder="Your phone number" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address *</label>
+                        <input type="text" id="address" placeholder="Street address" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" placeholder="City" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State *</label>
+                            <input type="text" id="state" placeholder="State" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="zipcode">Zip Code *</label>
+                            <input type="text" id="zipcode" placeholder="Zip code" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country *</label>
+                            <input type="text" id="country" placeholder="Country" value="India" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="form-section">
+                    <h2><i class="fas fa-credit-card" style="margin-right: 8px; color: var(--accent);"></i>Payment Information</h2>
+                    <div class="form-group">
+                        <label>Payment Method *</label>
+                        <div class="payment-methods">
+                            <label class="method-option"><input type="radio" name="paymentMethod" value="cod" checked> COD</label>
+                            <label class="method-option"><input type="radio" name="paymentMethod" value="online"> Online Payment</label>
+                        </div>
+                    </div>
+
+                    <div id="onlinePaymentOptions" style="display:none;">
+                        <div class="form-group">
+                            <label>UPI App *</label>
+                            <div class="payment-methods">
+                                <label class="method-option"><input type="radio" name="upiApp" value="gpay" checked> GPay</label>
+                                <label class="method-option"><input type="radio" name="upiApp" value="phonepe"> PhonePe</label>
+                            </div>
+                        </div>
+                        <div class="qr-box">
+                            <img id="paymentQr" src="" alt="UPI QR Code">
+                            <p id="paymentNote">Scan the QR code using your UPI app to complete the payment.</p>
+                            <a id="upiDeepLink" class="upi-link" href="#">Open in app</a>
+                        </div>
+                    </div>
+
+                    <div id="codNotice" class="cod-notice">Pay in cash when your order is delivered to your doorstep.</div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="form-section">
+                    <h2><i class="fas fa-box" style="margin-right: 8px; color: var(--accent);"></i>Delivery Options</h2>
+                    <div class="form-group">
+                        <label for="shipping">Shipping Method *</label>
+                        <select id="shipping" required>
+                            <option value="">Select shipping method</option>
+                            <option value="standard">Standard Shipping (5-7 days) - Free</option>
+                            <option value="express">Express Shipping (2-3 days) - ₹199</option>
+                            <option value="overnight">Overnight Shipping (1 day) - ₹499</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="newsletter" checked>
+                            <span style="margin-left: 8px;">Send me updates about new products and offers</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="terms" required>
+                            <span style="margin-left: 8px;">I agree to the <strong>Terms & Conditions</strong> and <strong>Privacy Policy</strong> *</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="checkout-btn" onclick="placeOrder()">Place Order</button>
+                <button class="checkout-btn" style="background: transparent; color: var(--text-main); border: 2px solid var(--text-muted); margin-top: 12px;" onclick="window.location.href='./addtocard.html'">Back to Cart</button>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+                
+                <div class="cart-items" id="cartItemsList"></div>
+
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span id="subtotal">₹0</span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span id="shipping-cost">Free</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tax</span>
+                    <span id="tax">₹0</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total Amount</span>
+                    <span id="total">₹0</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 12px;">All prices are in Indian Rupees (₹)</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <div class="icon"><i class="fas fa-check-circle"></i></div>
+            <h2>Order Confirmed!</h2>
+            <p>Your order has been placed successfully. You will receive a confirmation email shortly with your order details and tracking information.</p>
+            <button class="modal-btn" onclick="goHome()">Continue Shopping</button>
+        </div>
+    </div>
+
+    <div class="custom-alert" id="customAlert">
+        <i class="fas fa-info-circle" style="color: var(--accent);"></i>
+        <span id="alertMsg">Message goes here</span>
+    </div>
+
+    <script>
+        function getCart() {
+            return JSON.parse(localStorage.getItem('cart') || '[]');
+        }
+
+        function getWishlist() {
+            return JSON.parse(localStorage.getItem('wishlist') || '[]');
+        }
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('customAlert');
+            document.getElementById('alertMsg').innerText = message;
+            alertBox.style.display = 'flex';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 2500);
+        }
+
+        function calculateTotals() {
+            const cart = getCart();
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const shippingSelect = document.getElementById('shipping');
+            let shippingCost = 0;
+            let shippingText = 'Free';
+            
+            if (shippingSelect.value === 'express') {
+                shippingCost = 199;
+                shippingText = '₹199';
+            } else if (shippingSelect.value === 'overnight') {
+                shippingCost = 499;
+                shippingText = '₹499';
+            }
+            
+            const tax = Math.round(subtotal * 0.18); // 18% GST
+            const total = subtotal + shippingCost + tax;
+
+            document.getElementById('subtotal').textContent = new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:0}).format(subtotal);
+            document.getElementById('shipping-cost').textContent = shippingText;
+            document.getElementById('tax').textContent = new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:0}).format(tax);
+            document.getElementById('total').textContent = new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:0}).format(total);
+        }
+
+        function renderCartItems() {
+            const cart = getCart();
+            const itemsList = document.getElementById('cartItemsList');
+            itemsList.innerHTML = '';
+
+            if (!cart.length) {
+                document.getElementById('cartEmptyMessage').style.display = 'block';
+                document.getElementById('checkoutSection').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('cartEmptyMessage').style.display = 'none';
+            document.getElementById('checkoutSection').style.display = 'grid';
+
+            cart.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'mini-product';
+                item.innerHTML = `
+                    <img src="${product.img}" alt="${product.name}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200';">
+                    <div class="mini-product-info">
+                        <h4>${product.name}</h4>
+                        <p>${product.category}</p>
+                        <p style="font-weight: 600; color: var(--accent);">${new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:0}).format(product.price)}</p>
+                    </div>
+                `;
+                itemsList.appendChild(item);
+            });
+
+            calculateTotals();
+        }
+
+        function validateForm() {
+            const required = ['fullname', 'email', 'phone', 'address', 'city', 'state', 'zipcode', 'country', 'shipping'];
+            
+            for (let field of required) {
+                const value = document.getElementById(field).value.trim();
+                if (!value) {
+                    showAlert(`Please fill in all required fields. Missing: ${field}`);
+                    return false;
+                }
+            }
+
+            if (!document.getElementById('terms').checked) {
+                showAlert('Please accept the Terms & Conditions');
+                return false;
+            }
+
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            if (paymentMethod === 'online') {
+                const total = Number(document.getElementById('total').textContent.replace(/[^\d]/g, ''));
+                if (!total || total <= 0) {
+                    showAlert('Your order total is invalid.');
+                    return false;
+                }
+            }
+
+            const email = document.getElementById('email').value;
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                showAlert('Please enter a valid email address');
+                return false;
+            }
+
+            const phone = document.getElementById('phone').value;
+            if (!phone.match(/^[0-9]{10}$/)) {
+                showAlert('Please enter a valid 10-digit phone number');
+                return false;
+            }
+
+            return true;
+        }
+
+        function getBuyNowItems() {
+            const buyNowItems = JSON.parse(localStorage.getItem('buyNowItems') || '[]');
+            if (buyNowItems && buyNowItems.length) return buyNowItems;
+            return getCart();
+        }
+
+        function getUpiLink() {
+            const selectedApp = document.querySelector('input[name="upiApp"]:checked')?.value || 'gpay';
+            const total = Number(document.getElementById('total').textContent.replace(/[^\d]/g, '')) || 0;
+            const upiId = selectedApp === 'gpay' ? 'trendy.store@oksbi' : 'trendy.store@upi';
+            return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent('Trendy Store')}&am=${total}&cu=INR&tn=${encodeURIComponent('Trendy Store order payment')}`;
+        }
+
+        function updatePaymentUI() {
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const onlineOptions = document.getElementById('onlinePaymentOptions');
+            const codNotice = document.getElementById('codNotice');
+            const isOnline = paymentMethod === 'online';
+
+            onlineOptions.style.display = isOnline ? 'block' : 'none';
+            codNotice.style.display = isOnline ? 'none' : 'block';
+            if (isOnline) {
+                updateQrCode();
+            }
+        }
+
+        function updateQrCode() {
+            const selectedApp = document.querySelector('input[name="upiApp"]:checked')?.value || 'gpay';
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(getUpiLink())}&size=220x220&margin=10`;
+            const qrImage = document.getElementById('paymentQr');
+            const note = document.getElementById('paymentNote');
+            const deepLink = document.getElementById('upiDeepLink');
+            qrImage.src = qrUrl;
+            note.textContent = `Scan the QR with ${selectedApp === 'gpay' ? 'GPay' : 'PhonePe'} to complete the payment.`;
+            deepLink.href = getUpiLink();
+            deepLink.textContent = `Open ${selectedApp === 'gpay' ? 'GPay' : 'PhonePe'} app`;
+        }
+
+        function placeOrder() {
+            if (!validateForm()) {
+                return;
+            }
+
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const orderData = {
+                date: new Date().toISOString(),
+                items: getBuyNowItems(),
+                delivery: {
+                    name: document.getElementById('fullname').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    zipcode: document.getElementById('zipcode').value,
+                    country: document.getElementById('country').value
+                },
+                shipping: document.getElementById('shipping').value,
+                paymentMethod,
+                total: document.getElementById('total').textContent
+            };
+
+            let orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(orderData);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            localStorage.setItem('cart', JSON.stringify([]));
+            localStorage.removeItem('buyNowItems');
+            localStorage.removeItem('buyNowMode');
+
+            if (paymentMethod === 'online') {
+                const upiLink = getUpiLink();
+                if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    window.location.href = upiLink;
+                    return;
+                }
+                window.open(upiLink, '_blank');
+            }
+
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function goHome() {
+            window.location.href = './index.html';
+        }
+
+        // Update shipping cost when selection changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const shippingSelect = document.getElementById('shipping');
+            shippingSelect.addEventListener('change', calculateTotals);
+
+            document.querySelectorAll('input[name="paymentMethod"]').forEach((radio) => {
+                radio.addEventListener('change', updatePaymentUI);
+            });
+
+            document.querySelectorAll('input[name="upiApp"]').forEach((radio) => {
+                radio.addEventListener('change', updateQrCode);
+            });
+
+            const cartItems = getBuyNowItems();
+            const savedCart = getCart();
+            localStorage.setItem('buyNowItems', JSON.stringify(cartItems.length ? cartItems : savedCart));
+
+            renderCartItems();
+            updatePaymentUI();
+        });
+    </script>
+</body>
+</html>

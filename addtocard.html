@@ -46,6 +46,8 @@
         .checkout-panel h3 { margin: 0 0 16px; font-size: 20px; }
         .checkout-total { display: flex; justify-content: space-between; gap: 12px; font-size: 18px; font-weight: 700; }
         .checkout-note { margin-top: 10px; color: var(--text-muted); }
+        .checkout-action { margin-top: 18px; width: 100%; padding: 14px 18px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; transition: var(--transition); }
+        .checkout-action:hover { background: var(--accent); }
         .empty-state { text-align: center; padding: 60px 20px; background: #fff; border-radius: 22px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.06); }
         .custom-alert { position: fixed; bottom: 30px; right: 30px; background: #121212; color: white; padding: 16px 28px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); z-index: 3000; display: none; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; border-left: 4px solid var(--accent); animation: slideInUp 0.4s ease; }
         @keyframes slideInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -57,7 +59,7 @@
         <a href="./index.html" class="logo">Trendy Store<span></span></a>
         <div class="nav-links">
             <a href="./index.html">Home</a>
-            <a href="./addtocard.html">Cart</a>
+            
             <a href="./profile.html">Profile</a>
         </div>
     </nav>
@@ -81,6 +83,7 @@
                 <span>Estimated total</span>
                 <span id="cartTotalPrice">₹0</span>
             </div>
+            <button class="checkout-action" onclick="buyAllCartItems()">Buy All Products</button>
             <p class="checkout-note">This is a client-side preview. Checkout flow can be added separately.</p>
         </div>
     </main>
@@ -119,6 +122,24 @@
             showAlert('Product removed from your cart.');
         }
 
+        function buyAllCartItems() {
+            const cart = getCart();
+            if (!cart.length) {
+                showAlert('Your cart is empty.');
+                return;
+            }
+            localStorage.setItem('buyNowItems', JSON.stringify(cart));
+            localStorage.setItem('buyNowMode', 'cart');
+            window.location.href = './buynow.html';
+        }
+
+        function buySingleProduct(product) {
+            if (!product) return;
+            localStorage.setItem('buyNowItems', JSON.stringify([product]));
+            localStorage.setItem('buyNowMode', 'single');
+            window.location.href = './buynow.html';
+        }
+
         function renderCart() {
             const cart = getCart();
             cartGrid.innerHTML = '';
@@ -146,7 +167,7 @@
                         <p>${product.desc}</p>
                         <div class="cart-actions">
                             <button class="cart-btn btn-remove" onclick="removeFromCart(${product.id})">Remove</button>
-                            <button class="cart-btn btn-back" onclick="window.location.href='./index.html'">Continue Shopping</button>
+                            <button class="cart-btn btn-back" onclick="buySingleProduct(${JSON.stringify(product)})">Buy Now</button>
                         </div>
                     </div>
                 `;
