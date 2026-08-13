@@ -37,6 +37,8 @@
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--text-main); }
         .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; transition: var(--transition); }
         .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(184, 144, 71, 0.1); }
+        .field-error { min-height: 18px; margin-top: 6px; font-size: 12px; color: #c74b4b; display: block; }
+        .invalid { border-color: #c74b4b !important; box-shadow: 0 0 0 3px rgba(199, 75, 75, 0.08) !important; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .order-summary { background: var(--card-bg); border-radius: 22px; padding: 24px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.06); height: fit-content; position: sticky; top: 80px; }
         .order-summary h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
@@ -52,7 +54,7 @@
         .mini-product-info h4 { margin: 0 0 4px; font-size: 12px; font-weight: 600; }
         .mini-product-info p { color: var(--text-muted); margin: 0; }
         .checkout-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: var(--transition); margin-top: 20px; }
-        .checkout-btn:hover { background: var(--accent); transform: translateY(-2px); }
+        .checkout-btn:hover { background: vair(--accent); transform: translateY(-2px); }
         .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .payment-methods { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
         .method-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; background: #f5f5f5; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); font-weight: 600; color: var(--text-main); }
@@ -105,39 +107,58 @@
                     <div class="form-group">
                         <label for="fullname">Full Name *</label>
                         <input type="text" id="fullname" placeholder="Enter your full name" required>
+                        <span class="field-error" id="fullnameError"></span>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="email">Email Address *</label>
                             <input type="email" id="email" placeholder="your@email.com" required>
+                            <span class="field-error" id="emailError"></span>
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number *</label>
                             <input type="tel" id="phone" placeholder="Your phone number" required>
+                            <span class="field-error" id="phoneError"></span>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="address">Address *</label>
                         <input type="text" id="address" placeholder="Street address" required>
+                        <span class="field-error" id="addressError"></span>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="city">City *</label>
-                            <input type="text" id="city" placeholder="City" required>
+                            <label for="state">State *</label>
+                            <select id="state" required>
+                                <option value="">Select state</option>
+                            </select>
+                            <span class="field-error" id="stateError"></span>
                         </div>
                         <div class="form-group">
-                            <label for="state">State *</label>
-                            <input type="text" id="state" placeholder="State" required>
+                            <label for="city">City *</label>
+                            <select id="city" required>
+                                <option value="">Select city</option>
+                            </select>
+                            <span class="field-error" id="cityError"></span>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="area">Area / Locality *</label>
+                        <select id="area" required>
+                            <option value="">Select area</option>
+                        </select>
+                        <span class="field-error" id="areaError"></span>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="zipcode">Zip Code *</label>
                             <input type="text" id="zipcode" placeholder="Zip code" required>
+                            <span class="field-error" id="zipcodeError"></span>
                         </div>
                         <div class="form-group">
                             <label for="country">Country *</label>
                             <input type="text" id="country" placeholder="Country" value="India" required>
+                            <span class="field-error" id="countryError"></span>
                         </div>
                     </div>
                 </div>
@@ -155,16 +176,52 @@
 
                     <div id="onlinePaymentOptions" style="display:none;">
                         <div class="form-group">
-                            <label>UPI App *</label>
+                            <label>Online Payment Method *</label>
                             <div class="payment-methods">
-                                <label class="method-option"><input type="radio" name="upiApp" value="gpay" checked> GPay</label>
-                                <label class="method-option"><input type="radio" name="upiApp" value="phonepe"> PhonePe</label>
+                                <label class="method-option"><input type="radio" name="onlinePaymentType" value="upi" checked> UPI</label>
+                                <label class="method-option"><input type="radio" name="onlinePaymentType" value="debitCard"> Debit Card</label>
+                                <label class="method-option"><input type="radio" name="onlinePaymentType" value="creditCard"> Credit Card</label>
                             </div>
                         </div>
-                        <div class="qr-box">
-                            <img id="paymentQr" src="" alt="UPI QR Code">
-                            <p id="paymentNote">Scan the QR code using your UPI app to complete the payment.</p>
-                            <a id="upiDeepLink" class="upi-link" href="#">Open in app</a>
+
+                        <div id="upiPaymentOptions">
+                            <div class="form-group">
+                                <label>UPI App *</label>
+                                <div class="payment-methods">
+                                    <label class="method-option"><input type="radio" name="upiApp" value="gpay" checked> GPay</label>
+                                    <label class="method-option"><input type="radio" name="upiApp" value="phonepe"> PhonePe</label>
+                                </div>
+                            </div>
+                            <div class="qr-box">
+                                <img id="paymentQr" src="" alt="UPI QR Code">
+                                <p id="paymentNote">Scan the QR code using your UPI app to complete the payment.</p>
+                                <a id="upiDeepLink" class="upi-link" href="#">Open in app</a>
+                            </div>
+                        </div>
+
+                        <div id="cardPaymentDetails" style="display:none;">
+                            <div class="form-group">
+                                <label for="cardName">Name on Card *</label>
+                                <input type="text" id="cardName" placeholder="Enter name as shown on card">
+                                <span class="field-error" id="cardNameError"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="cardNumber">Card Number *</label>
+                                <input type="text" id="cardNumber" maxlength="19" placeholder="1234 5678 9012 3456">
+                                <span class="field-error" id="cardNumberError"></span>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cardExpiry">Expiry Date *</label>
+                                    <input type="text" id="cardExpiry" maxlength="5" placeholder="MM/YY">
+                                    <span class="field-error" id="cardExpiryError"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cardCvv">CVV *</label>
+                                    <input type="password" id="cardCvv" maxlength="4" placeholder="123">
+                                    <span class="field-error" id="cardCvvError"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -314,44 +371,153 @@
             calculateTotals();
         }
 
-        function validateForm() {
-            const required = ['fullname', 'email', 'phone', 'address', 'city', 'state', 'zipcode', 'country', 'shipping'];
-            
-            for (let field of required) {
-                const value = document.getElementById(field).value.trim();
-                if (!value) {
-                    showAlert(`Please fill in all required fields. Missing: ${field}`);
+        function clearFieldError(fieldId) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            const inputEl = document.getElementById(fieldId);
+            if (errorEl) errorEl.textContent = '';
+            if (inputEl) inputEl.classList.remove('invalid');
+        }
+
+        function setFieldError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            const inputEl = document.getElementById(fieldId);
+            if (errorEl) errorEl.textContent = message;
+            if (inputEl) inputEl.classList.add('invalid');
+        }
+
+        function validateSingleField(fieldId, rules = []) {
+            const input = document.getElementById(fieldId);
+            if (!input) return true;
+
+            const value = input.value.trim();
+            clearFieldError(fieldId);
+
+            for (const rule of rules) {
+                if (rule.type === 'required' && !value) {
+                    setFieldError(fieldId, rule.message);
                     return false;
                 }
+                if (rule.type === 'minLength' && value && value.length < rule.value) {
+                    setFieldError(fieldId, rule.message);
+                    return false;
+                }
+                if (rule.type === 'pattern' && value && !rule.pattern.test(value)) {
+                    setFieldError(fieldId, rule.message);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function validateAddressFields() {
+            let isValid = true;
+            const requiredRules = {
+                fullname: [{ type: 'required', message: 'Full name is required.' }],
+                email: [
+                    { type: 'required', message: 'Email is required.' },
+                    { type: 'pattern', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email address.' }
+                ],
+                phone: [
+                    { type: 'required', message: 'Phone number is required.' },
+                    { type: 'pattern', pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit phone number.' }
+                ],
+                address: [
+                    { type: 'required', message: 'Street address is required.' },
+                    { type: 'minLength', value: 5, message: 'Address must be at least 5 characters long.' }
+                ],
+                state: [
+                    { type: 'required', message: 'Please select a state.' }
+                ],
+                city: [
+                    { type: 'required', message: 'Please select a city.' }
+                ],
+                area: [
+                    { type: 'required', message: 'Please select an area or locality.' }
+                ],
+                zipcode: [
+                    { type: 'required', message: 'Zip code is required.' },
+                    { type: 'pattern', pattern: /^[0-9]{5,6}$/, message: 'Zip code must be 5 or 6 digits.' }
+                ],
+                country: [
+                    { type: 'required', message: 'Country is required.' },
+                    { type: 'minLength', value: 2, message: 'Country must contain at least 2 characters.' }
+                ]
+            };
+
+            Object.entries(requiredRules).forEach(([fieldId, rules]) => {
+                if (!validateSingleField(fieldId, rules)) {
+                    isValid = false;
+                }
+            });
+
+            const shipping = document.getElementById('shipping');
+            if (!shipping.value) {
+                setFieldError('shipping', 'Please select a shipping method.');
+                isValid = false;
+            } else {
+                clearFieldError('shipping');
             }
 
             if (!document.getElementById('terms').checked) {
                 showAlert('Please accept the Terms & Conditions');
-                return false;
+                isValid = false;
             }
 
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             if (paymentMethod === 'online') {
+                const onlineType = document.querySelector('input[name="onlinePaymentType"]:checked')?.value || 'upi';
                 const total = Number(document.getElementById('total').textContent.replace(/[^\d]/g, ''));
                 if (!total || total <= 0) {
                     showAlert('Your order total is invalid.');
-                    return false;
+                    isValid = false;
+                }
+
+                if (onlineType === 'debitCard' || onlineType === 'creditCard') {
+                    const cardNameRules = [{ type: 'required', message: 'Name on card is required.' }];
+                    const cardNumberRules = [
+                        { type: 'required', message: 'Card number is required.' },
+                        { type: 'pattern', pattern: /^[0-9 ]{16,19}$/, message: 'Enter a valid 16-digit card number.' }
+                    ];
+                    const cardExpiryRules = [
+                        { type: 'required', message: 'Expiry date is required.' },
+                        { type: 'pattern', pattern: /^(0[1-9]|1[0-2])\/[0-9]{2}$/, message: 'Use MM/YY format.' }
+                    ];
+                    const cardCvvRules = [
+                        { type: 'required', message: 'CVV is required.' },
+                        { type: 'pattern', pattern: /^[0-9]{3,4}$/, message: 'CVV must be 3 or 4 digits.' }
+                    ];
+
+                    if (!validateSingleField('cardName', cardNameRules)) isValid = false;
+                    if (!validateSingleField('cardNumber', cardNumberRules)) isValid = false;
+                    if (!validateSingleField('cardExpiry', cardExpiryRules)) isValid = false;
+                    if (!validateSingleField('cardCvv', cardCvvRules)) isValid = false;
+
+                    const cardNumberValue = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+                    if (cardNumberValue.length !== 16) {
+                        setFieldError('cardNumber', 'Card number must be 16 digits.');
+                        isValid = false;
+                    }
+
+                    const expiryValue = document.getElementById('cardExpiry').value;
+                    if (expiryValue) {
+                        const [month, year] = expiryValue.split('/');
+                        const expiryDate = new Date(2000 + Number(year), Number(month));
+                        const today = new Date();
+                        today.setDate(1);
+                        if (expiryDate <= today) {
+                            setFieldError('cardExpiry', 'Card expiry date must be in the future.');
+                            isValid = false;
+                        }
+                    }
                 }
             }
 
-            const email = document.getElementById('email').value;
-            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                showAlert('Please enter a valid email address');
-                return false;
-            }
+            return isValid;
+        }
 
-            const phone = document.getElementById('phone').value;
-            if (!phone.match(/^[0-9]{10}$/)) {
-                showAlert('Please enter a valid 10-digit phone number');
-                return false;
-            }
-
-            return true;
+        function validateForm() {
+            return validateAddressFields();
         }
 
         function getBuyNowItems() {
@@ -367,16 +533,42 @@
             return `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent('Trendy Store')}&am=${total}&cu=INR&tn=${encodeURIComponent('Trendy Store order payment')}`;
         }
 
+        function getSelectedOnlinePaymentType() {
+            return document.querySelector('input[name="onlinePaymentType"]:checked')?.value || 'upi';
+        }
+
+        function formatCardNumber(value) {
+            return value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
+        }
+
+        function formatExpiryValue(value) {
+            const digits = value.replace(/\D/g, '').slice(0, 4);
+            if (digits.length <= 2) return digits;
+            return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        }
+
         function updatePaymentUI() {
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             const onlineOptions = document.getElementById('onlinePaymentOptions');
             const codNotice = document.getElementById('codNotice');
+            const upiPaymentOptions = document.getElementById('upiPaymentOptions');
+            const cardPaymentDetails = document.getElementById('cardPaymentDetails');
             const isOnline = paymentMethod === 'online';
+            const selectedOnlineType = getSelectedOnlinePaymentType();
 
             onlineOptions.style.display = isOnline ? 'block' : 'none';
             codNotice.style.display = isOnline ? 'none' : 'block';
+
             if (isOnline) {
-                updateQrCode();
+                const showUpi = selectedOnlineType === 'upi';
+                upiPaymentOptions.style.display = showUpi ? 'block' : 'none';
+                cardPaymentDetails.style.display = showUpi ? 'none' : 'block';
+                if (showUpi) {
+                    updateQrCode();
+                }
+            } else {
+                upiPaymentOptions.style.display = 'block';
+                cardPaymentDetails.style.display = 'none';
             }
         }
 
@@ -398,6 +590,7 @@
             }
 
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const selectedOnlinePaymentType = paymentMethod === 'online' ? getSelectedOnlinePaymentType() : 'cod';
             const orderData = {
                 date: new Date().toISOString(),
                 items: getBuyNowItems(),
@@ -406,6 +599,7 @@
                     email: document.getElementById('email').value,
                     phone: document.getElementById('phone').value,
                     address: document.getElementById('address').value,
+                    area: document.getElementById('area').value,
                     city: document.getElementById('city').value,
                     state: document.getElementById('state').value,
                     zipcode: document.getElementById('zipcode').value,
@@ -413,6 +607,7 @@
                 },
                 shipping: document.getElementById('shipping').value,
                 paymentMethod,
+                onlinePaymentType: selectedOnlinePaymentType,
                 total: document.getElementById('total').textContent
             };
 
@@ -425,12 +620,16 @@
             localStorage.removeItem('buyNowMode');
 
             if (paymentMethod === 'online') {
-                const upiLink = getUpiLink();
-                if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                    window.location.href = upiLink;
-                    return;
+                if (selectedOnlinePaymentType === 'upi') {
+                    const upiLink = getUpiLink();
+                    if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                        window.location.href = upiLink;
+                        return;
+                    }
+                    window.open(upiLink, '_blank');
+                } else {
+                    showAlert('Card payment verified successfully. Order is placed.');
                 }
-                window.open(upiLink, '_blank');
             }
 
             document.getElementById('successModal').classList.add('active');
@@ -443,9 +642,48 @@
         // Update shipping cost when selection changes
         document.addEventListener('DOMContentLoaded', function() {
             const shippingSelect = document.getElementById('shipping');
-            shippingSelect.addEventListener('change', calculateTotals);
+            const stateSelect = document.getElementById('state');
+            const citySelect = document.getElementById('city');
+            const areaSelect = document.getElementById('area');
+
+            shippingSelect.addEventListener('change', () => {
+                clearFieldError('shipping');
+                calculateTotals();
+            });
+
+            stateSelect.addEventListener('change', () => {
+                clearFieldError('state');
+                updateCityOptions();
+                clearFieldError('city');
+                clearFieldError('area');
+                validateSingleField('state', getValidationRules('state'));
+            });
+
+            citySelect.addEventListener('change', () => {
+                clearFieldError('city');
+                updateAreaOptions();
+                clearFieldError('area');
+                validateSingleField('city', getValidationRules('city'));
+            });
+
+            areaSelect.addEventListener('change', () => {
+                clearFieldError('area');
+                validateSingleField('area', getValidationRules('area'));
+            });
+
+            const addressFields = ['fullname', 'email', 'phone', 'address', 'zipcode', 'country'];
+            addressFields.forEach((fieldId) => {
+                const input = document.getElementById(fieldId);
+                if (!input) return;
+                input.addEventListener('input', () => validateSingleField(fieldId, getValidationRules(fieldId)));
+                input.addEventListener('blur', () => validateSingleField(fieldId, getValidationRules(fieldId)));
+            });
 
             document.querySelectorAll('input[name="paymentMethod"]').forEach((radio) => {
+                radio.addEventListener('change', updatePaymentUI);
+            });
+
+            document.querySelectorAll('input[name="onlinePaymentType"]').forEach((radio) => {
                 radio.addEventListener('change', updatePaymentUI);
             });
 
@@ -453,6 +691,51 @@
                 radio.addEventListener('change', updateQrCode);
             });
 
+            const cardNumberInput = document.getElementById('cardNumber');
+            const cardExpiryInput = document.getElementById('cardExpiry');
+            if (cardNumberInput) {
+                cardNumberInput.addEventListener('input', () => {
+                    cardNumberInput.value = formatCardNumber(cardNumberInput.value);
+                    clearFieldError('cardNumber');
+                    validateSingleField('cardNumber', [
+                        { type: 'required', message: 'Card number is required.' },
+                        { type: 'pattern', pattern: /^[0-9 ]{16,19}$/, message: 'Enter a valid 16-digit card number.' }
+                    ]);
+                });
+            }
+
+            if (cardExpiryInput) {
+                cardExpiryInput.addEventListener('input', () => {
+                    cardExpiryInput.value = formatExpiryValue(cardExpiryInput.value);
+                    clearFieldError('cardExpiry');
+                    validateSingleField('cardExpiry', [
+                        { type: 'required', message: 'Expiry date is required.' },
+                        { type: 'pattern', pattern: /^(0[1-9]|1[0-2])\/[0-9]{2}$/, message: 'Use MM/YY format.' }
+                    ]);
+                });
+            }
+
+            const cardNameInput = document.getElementById('cardName');
+            if (cardNameInput) {
+                cardNameInput.addEventListener('input', () => {
+                    clearFieldError('cardName');
+                    validateSingleField('cardName', [{ type: 'required', message: 'Name on card is required.' }]);
+                });
+            }
+
+            const cardCvvInput = document.getElementById('cardCvv');
+            if (cardCvvInput) {
+                cardCvvInput.addEventListener('input', () => {
+                    cardCvvInput.value = cardCvvInput.value.replace(/\D/g, '').slice(0, 4);
+                    clearFieldError('cardCvv');
+                    validateSingleField('cardCvv', [
+                        { type: 'required', message: 'CVV is required.' },
+                        { type: 'pattern', pattern: /^[0-9]{3,4}$/, message: 'CVV must be 3 or 4 digits.' }
+                    ]);
+                });
+            }
+
+            populateLocationSelectors();
             const cartItems = getBuyNowItems();
             const savedCart = getCart();
             localStorage.setItem('buyNowItems', JSON.stringify(cartItems.length ? cartItems : savedCart));
@@ -460,6 +743,127 @@
             renderCartItems();
             updatePaymentUI();
         });
+
+        const locationData = {
+            'Andhra Pradesh': {
+                'Visakhapatnam': ['MVP Colony', 'Gajuwaka', 'Marripalem', 'Dabagardens'],
+                'Vijayawada': ['Governorpet', 'Benz Circle', 'Patamata', 'Autonagar'],
+                'Guntur': ['Kothapet', 'Brodipet', 'Lakshmipuram', 'Arundelpet']
+            },
+            'Gujarat': {
+                'Ahmedabad': ['Navrangpura', 'Satellite', 'Bopal', 'Maninagar'],
+                'Surat': ['Adajan', 'Athwa', 'Udhna', 'Varachha'],
+                'Vadodara': ['Alkapuri', 'Karelibaug', 'Makarpura', 'Tarsali'],
+                'Dabholi': ['Dabholi Main', 'Dabholi Market', 'Near Railway Crossing', 'Vapi Road Surroundings']
+            },
+            'Maharashtra': {
+                'Mumbai': ['Andheri West', 'Dadar', 'Powai', 'Chembur'],
+                'Pune': ['Kalyani Nagar', 'Baner', 'Shivajinagar', 'Wakad'],
+                'Nagpur': ['Dhantoli', 'Sadar', 'Sitabuldi', 'Nandanvan'],
+                'Nashik': ['College Road', 'C.B.D.', 'Gangapur Road', 'Panchavati']
+            },
+            'Tamil Nadu': {
+                'Chennai': ['Adyar', 'Velachery', 'T Nagar', 'Tambaram'],
+                'Coimbatore': ['Peelamedu', 'RS Puram', 'Saibaba Colony', 'Gandhipuram'],
+                'Madurai': ['KK Nagar', 'Anna Nagar', 'Palanganatham', 'Simmakkal']
+            },
+            'Karnataka': {
+                'Bengaluru': ['Indiranagar', 'Koramangala', 'Jayanagar', 'Whitefield'],
+                'Mysuru': ['Vijayanagar', 'Jayalakshmipuram', 'Nazarbad', 'Srirampura'],
+                'Hubballi': ['Old Hubli', 'Vidyanagar', 'Unkal', 'Gokul Road']
+            },
+            'Delhi': {
+                'New Delhi': ['Connaught Place', 'Dwarka', 'Rohini', 'Saket'],
+                'North Delhi': ['Model Town', 'Ashok Vihar', 'Seelampur', 'Civil Lines']
+            },
+            'West Bengal': {
+                'Kolkata': ['Salt Lake', 'Howrah', 'Behala', 'Park Street'],
+                'Durgapur': ['City Centre', 'Sanjay Nagar', 'Muchipara', 'Rajarhat']
+            },
+            'Rajasthan': {
+                'Jaipur': ['Vaishali Nagar', 'Malviya Nagar', 'Mansarovar', 'Sodala'],
+                'Jodhpur': ['Paota', 'Ratanada', 'Shastri Nagar', 'Mogra']
+            },
+            'Punjab': {
+                'Chandigarh': ['Sector 17', 'Sector 35', 'Madhya Marg', 'Manimajra'],
+                'Ludhiana': ['Model Town', 'Civil Lines', 'Pakhowal Road', 'Sarabha Nagar']
+            },
+            'Uttar Pradesh': {
+                'Lucknow': ['Aliganj', 'Hazratganj', 'Indira Nagar', 'Aashiana'],
+                'Kanpur': ['Swaroop Nagar', 'Civil Lines', 'Kalyanpur', 'Shastri Nagar'],
+                'Agra': ['Sikandra', 'Dayalbagh', 'Tajganj', 'Rakabganj']
+            }
+        };
+
+        function populateLocationSelectors() {
+            const stateSelect = document.getElementById('state');
+            const citySelect = document.getElementById('city');
+            const areaSelect = document.getElementById('area');
+            stateSelect.innerHTML = '<option value="">Select state</option>' +
+                Object.keys(locationData).map(state => `<option value="${state}">${state}</option>`).join('');
+
+            citySelect.innerHTML = '<option value="">Select city</option>';
+            areaSelect.innerHTML = '<option value="">Select area</option>';
+        }
+
+        function updateCityOptions() {
+            const stateSelect = document.getElementById('state');
+            const citySelect = document.getElementById('city');
+            const areaSelect = document.getElementById('area');
+            const selectedState = stateSelect.value;
+            citySelect.innerHTML = '<option value="">Select city</option>';
+            areaSelect.innerHTML = '<option value="">Select area</option>';
+
+            if (!selectedState || !locationData[selectedState]) return;
+
+            const cities = Object.keys(locationData[selectedState]);
+            citySelect.innerHTML = '<option value="">Select city</option>' +
+                cities.map(city => `<option value="${city}">${city}</option>`).join('');
+        }
+
+        function updateAreaOptions() {
+            const stateSelect = document.getElementById('state');
+            const citySelect = document.getElementById('city');
+            const areaSelect = document.getElementById('area');
+            const selectedState = stateSelect.value;
+            const selectedCity = citySelect.value;
+            areaSelect.innerHTML = '<option value="">Select area</option>';
+
+            if (!selectedState || !selectedCity) return;
+            const areas = locationData[selectedState]?.[selectedCity] || [];
+            areaSelect.innerHTML = '<option value="">Select area</option>' +
+                areas.map(area => `<option value="${area}">${area}</option>`).join('');
+        }
+
+        function getValidationRules(fieldId) {
+            const rulesMap = {
+                fullname: [{ type: 'required', message: 'Full name is required.' }],
+                email: [
+                    { type: 'required', message: 'Email is required.' },
+                    { type: 'pattern', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Please enter a valid email address.' }
+                ],
+                phone: [
+                    { type: 'required', message: 'Phone number is required.' },
+                    { type: 'pattern', pattern: /^[0-9]{10}$/, message: 'Please enter a valid 10-digit phone number.' }
+                ],
+                address: [
+                    { type: 'required', message: 'Street address is required.' },
+                    { type: 'minLength', value: 5, message: 'Address must be at least 5 characters long.' }
+                ],
+                city: [{ type: 'required', message: 'Please select a city.' }],
+                state: [{ type: 'required', message: 'Please select a state.' }],
+                area: [{ type: 'required', message: 'Please select an area or locality.' }],
+                zipcode: [
+                    { type: 'required', message: 'Zip code is required.' },
+                    { type: 'pattern', pattern: /^[0-9]{5,6}$/, message: 'Zip code must be 5 or 6 digits.' }
+                ],
+                country: [
+                    { type: 'required', message: 'Country is required.' },
+                    { type: 'minLength', value: 2, message: 'Country must contain at least 2 characters.' }
+                ]
+            };
+            return rulesMap[fieldId] || [];
+        }
     </script>
 </body>
 </html>
