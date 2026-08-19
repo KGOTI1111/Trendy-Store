@@ -118,12 +118,11 @@
             }
             cart.push(product);
             saveCart(cart);
-            // Remove product from wishlist
             removeFromWishlist(product.id);
-            // Redirect to cart page
+            showAlert(`"${product.name}" added to cart.`);
             setTimeout(() => {
-                window.location.href = './addtocard.html';
-            }, 500);
+                window.location.href = './index.html';
+            }, 700);
         }
 
         function removeFromWishlist(id) {
@@ -164,5 +163,6 @@
 
         renderWishlist();
     </script>
+    <script src="./js/backend.js"></script>
 </body>
 </html>

@@ -862,6 +862,7 @@
             <li><a href="./Contactus.html">Contact Us</a></li>
             <li><a href="./InquiryMenu.html">Inquiry Here</a></li>
             <li><a id="navLoginLink" href="./login.html" class="nav-login-btn">Login</a></li>
+            <li><a id="navRegisterLink" href="./register.html" class="nav-login-btn">Register</a></li>
         </ul>
         <div class="nav-search">
             <form id="searchForm">
@@ -1438,6 +1439,9 @@
             cart.push(product);
             saveCart(cart);
             showAlert(`"${product.name}" added to your cart.`);
+            setTimeout(() => {
+                window.location.href = './index.html';
+            }, 700);
         }
 
         function addToWishlist(product) {
@@ -1456,6 +1460,9 @@
             saveWishlist(wishlist);
             showAlert(`"${product.name}" added to your Wishlist.`);
             closeModal();
+            setTimeout(() => {
+                window.location.href = './index.html';
+            }, 700);
         }
 
         const loginSuccessMessage = localStorage.getItem('loginSuccessMessage');
@@ -1626,5 +1633,6 @@
             showHeroSlide(heroIndex);
         }, 2000);
     </script>
+    <script src="./js/backend.js"></script>
 </body>
 </html>

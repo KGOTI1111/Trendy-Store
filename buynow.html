@@ -316,9 +316,19 @@
             setTimeout(() => { alertBox.style.display = 'none'; }, 2500);
         }
 
+        function getActiveCheckoutItems() {
+            const buyNowItems = JSON.parse(localStorage.getItem('buyNowItems') || '[]');
+            if (Array.isArray(buyNowItems) && buyNowItems.length) {
+                return buyNowItems;
+            }
+            const cartItems = getCart();
+            localStorage.setItem('buyNowItems', JSON.stringify(cartItems));
+            return cartItems;
+        }
+
         function calculateTotals() {
-            const cart = getCart();
-            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+            const items = getActiveCheckoutItems();
+            const subtotal = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
             const shippingSelect = document.getElementById('shipping');
             let shippingCost = 0;
             let shippingText = 'Free';
@@ -341,11 +351,11 @@
         }
 
         function renderCartItems() {
-            const cart = getCart();
+            const items = getActiveCheckoutItems();
             const itemsList = document.getElementById('cartItemsList');
             itemsList.innerHTML = '';
 
-            if (!cart.length) {
+            if (!items.length) {
                 document.getElementById('cartEmptyMessage').style.display = 'block';
                 document.getElementById('checkoutSection').style.display = 'none';
                 return;
@@ -354,7 +364,7 @@
             document.getElementById('cartEmptyMessage').style.display = 'none';
             document.getElementById('checkoutSection').style.display = 'grid';
 
-            cart.forEach(product => {
+            items.forEach(product => {
                 const item = document.createElement('div');
                 item.className = 'mini-product';
                 item.innerHTML = `
@@ -368,6 +378,7 @@
                 itemsList.appendChild(item);
             });
 
+            localStorage.setItem('buyNowItems', JSON.stringify(items));
             calculateTotals();
         }
 
@@ -521,9 +532,7 @@
         }
 
         function getBuyNowItems() {
-            const buyNowItems = JSON.parse(localStorage.getItem('buyNowItems') || '[]');
-            if (buyNowItems && buyNowItems.length) return buyNowItems;
-            return getCart();
+            return getActiveCheckoutItems();
         }
 
         function getUpiLink() {
@@ -865,5 +874,6 @@
             return rulesMap[fieldId] || [];
         }
     </script>
+    <script src="./js/backend.js"></script>
 </body>
 </html>

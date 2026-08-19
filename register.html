@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary:#121212;--accent:#b89047;--bg:#fbfbfd;--text-main:#222;--text-muted:#666;--shadow:0 10px 30px rgba(0,0,0,.06);--transition:all .35s cubic-bezier(.165,.84,.44,1)}
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
+        body{background:linear-gradient(135deg,#f9efe2 0%,var(--bg) 100%);color:var(--text-main);min-height:100vh}
+        nav{background:rgba(255,255,255,.9);backdrop-filter:blur(12px);padding:20px 5%;display:flex;justify-content:center;border-bottom:1px solid rgba(0,0,0,.05)}
+        .logo{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--primary);text-decoration:none;letter-spacing:1px}
+        .auth-page{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center;padding:40px 20px}
+        .auth-card{width:min(600px,100%);background:#fff;border-radius:24px;box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(0,0,0,.04)}
+        .auth-form{padding:40px;display:flex;flex-direction:column;gap:16px}.auth-form h2{font-size:24px;margin-bottom:4px}.subtitle{color:var(--text-muted);margin-bottom:8px}
+        .form-group{display:flex;flex-direction:column;gap:6px}.form-group label{font-size:13px;font-weight:700}.form-group input{padding:12px 14px;border:1px solid rgba(0,0,0,.1);border-radius:10px;background:#fcfcfc;transition:var(--transition);font-size:14px}.form-group input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(184,144,71,.16)}
+        .password-wrapper{position:relative}.password-wrapper input{width:100%;padding-right:42px}.password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--text-muted);cursor:pointer;font-size:15px}.password-toggle:hover{color:var(--accent)}
+        .error-text{min-height:16px;font-size:12px;color:#c74b4b}.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted)}.checkbox-row input{accent-color:var(--accent)}
+        .login-btn{margin-top:6px;padding:14px 18px;border:0;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:var(--transition)}.login-btn:hover{background:var(--accent);transform:translateY(-2px)}
+        .form-footer{margin-top:6px;font-size:13px;color:var(--text-muted)}.form-footer a{color:var(--accent);text-decoration:none;font-weight:700}.custom-alert{position:fixed;bottom:30px;right:30px;background:#121212;color:#fff;padding:16px 28px;border-radius:12px;display:none;gap:12px;font-size:13px;font-weight:600;border-left:4px solid var(--accent)}footer{text-align:center;padding:20px 5% 30px;color:var(--text-muted);font-size:12px}@media(max-width:600px){.auth-form{padding:24px}}
+    </style>
+</head>
+<body>
+    <nav><a href="./index.html" class="logo">Trendy Store</a></nav>
+    <main class="auth-page"><section class="auth-card"><form id="registerForm" class="auth-form" novalidate>
+        <h2>Create Account</h2><p class="subtitle">Create your account to start shopping.</p>
+        <div class="form-group"><label for="fullName">Full Name</label><input id="fullName" type="text" placeholder="Enter your full name"><div class="error-text" id="fullNameError"></div></div>
+        <div class="form-group"><label for="email">Email Address</label><input id="email" type="email" placeholder="you@example.com"><div class="error-text" id="emailError"></div></div>
+        <div class="form-group"><label for="mobile">Mobile Number</label><input id="mobile" type="tel" inputmode="numeric" placeholder="10-digit mobile number"><div class="error-text" id="mobileError"></div></div>
+        <div class="form-group"><label for="password">Password</label><div class="password-wrapper"><input id="password" type="password" placeholder="Create a strong password"><button type="button" class="password-toggle" data-target="password" aria-label="Show password"><i class="far fa-eye"></i></button></div><div class="error-text" id="passwordError"></div></div>
+        <div class="form-group"><label for="confirmPassword">Confirm Password</label><div class="password-wrapper"><input id="confirmPassword" type="password" placeholder="Re-enter your password"><button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button></div><div class="error-text" id="confirmPasswordError"></div></div>
+        <label class="checkbox-row"><input type="checkbox" id="terms"><span>I agree to the privacy policy and terms.</span></label><div class="error-text" id="termsError"></div>
+        <button type="submit" class="login-btn">Create Account</button><p class="form-footer">Already registered? <a href="./login.html">Login here</a></p><p class="form-footer">Return to the store <a href="./index.html">Home</a></p>
+    </form></section></main>
+    <div class="custom-alert" id="customAlert"><i class="fas fa-info-circle" style="color:var(--accent)"></i><span id="alertMsg"></span></div><footer>© 2026 Trendy Store Luxury Boutique. All rights reserved.</footer>
+    <script src="./js/backend.js"></script>
+</body>
+</html>

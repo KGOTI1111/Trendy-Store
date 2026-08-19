@@ -292,14 +292,8 @@
     <main class="auth-page">
         <section class="auth-card">
             <form id="loginForm" class="auth-form" novalidate>
-                <h2>Login</h2>
-                <p class="subtitle">Please fill in the details below.</p>
-
-                <div class="form-group">
-                    <label for="fullName">Full Name</label>
-                    <input id="fullName" name="fullName" type="text" placeholder="Enter your full name">
-                    <div class="error-text" id="fullNameError"></div>
-                </div>
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Log in to continue shopping.</p>
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
@@ -316,22 +310,8 @@
                     <div class="error-text" id="passwordError"></div>
                 </div>
 
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-wrapper">
-                        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter your password">
-                        <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
-                    </div>
-                    <div class="error-text" id="confirmPasswordError"></div>
-                </div>
-
-                <label class="checkbox-row">
-                    <input type="checkbox" id="terms" name="terms">
-                    <span>I agree to the privacy policy and terms.</span>
-                </label>
-                <div class="error-text" id="termsError"></div>
-
                 <button type="submit" class="login-btn">Login</button>
+                <p class="form-footer">New to Trendy Store? <a href="./register.html">Create an account</a></p>
                 <p class="form-footer">Return to the store <a href="./index.html">Home</a></p>
                 <div class="success-message" id="successMessage"></div>
             </form>
@@ -347,172 +327,7 @@
         © 2026 Trendy Store Luxury Boutique. All rights reserved.
     </footer>
 
-    <script>
-        const form = document.getElementById('loginForm');
-        const fullName = document.getElementById('fullName');
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-        const confirmPassword = document.getElementById('confirmPassword');
-        const terms = document.getElementById('terms');
-        const successMessage = document.getElementById('successMessage');
-        const passwordToggles = document.querySelectorAll('.password-toggle');
-
-        const errors = {
-            fullName: document.getElementById('fullNameError'),
-            email: document.getElementById('emailError'),
-            password: document.getElementById('passwordError'),
-            confirmPassword: document.getElementById('confirmPasswordError'),
-            terms: document.getElementById('termsError')
-        };
-
-        function showAlert(message) {
-            const alertBox = document.getElementById('customAlert');
-            document.getElementById('alertMsg').textContent = message;
-            alertBox.style.display = 'flex';
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 2500);
-        }
-
-        function getLoginRedirectParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                returnUrl: params.get('returnUrl') || './index.html',
-                action: params.get('action') || '',
-                productId: params.get('productId') || ''
-            };
-        }
-
-        function resolveRedirectUrl(rawUrl) {
-            try {
-                return new URL(rawUrl, window.location.href).toString();
-            } catch (error) {
-                return new URL('./index.html', window.location.href).toString();
-            }
-        }
-
-        function setLoginSuccessRedirect(userProfile) {
-            const { returnUrl, action, productId } = getLoginRedirectParams();
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            localStorage.setItem('loginSuccessMessage', 'Login successful! Welcome back to Trendy Store.');
-
-            const redirectUrl = new URL(resolveRedirectUrl(returnUrl));
-            if (action) redirectUrl.searchParams.set('action', action);
-            if (productId) redirectUrl.searchParams.set('productId', productId);
-            redirectUrl.searchParams.set('login', 'success');
-            window.location.href = redirectUrl.toString();
-        }
-
-        function redirectLoggedInUserAway() {
-            const existingUser = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            const params = new URLSearchParams(window.location.search);
-            const hasReturnUrl = Boolean(params.get('returnUrl'));
-
-            if (existingUser.fullName && !hasReturnUrl) {
-                window.location.href = './index.html';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', redirectLoggedInUserAway);
-
-        function validateField(fieldName) {
-            let message = '';
-
-            if (fieldName === 'fullName') {
-                if (!fullName.value.trim()) {
-                    message = 'Full name is required.';
-                } else if (fullName.value.trim().length < 3) {
-                    message = 'Full name must contain at least 3 characters.';
-                }
-            }
-
-            if (fieldName === 'email') {
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!email.value.trim()) {
-                    message = 'Email is required.';
-                } else if (!emailPattern.test(email.value.trim())) {
-                    message = 'Please enter a valid email address.';
-                }
-            }
-
-            if (fieldName === 'password') {
-                if (!password.value) {
-                    message = 'Password is required.';
-                } else if (password.value.length < 8) {
-                    message = 'Password must be at least 8 characters.';
-                } else if (!/[A-Z]/.test(password.value) || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value)) {
-                    message = 'Password must include an uppercase letter, a number, and a special character.';
-                }
-            }
-
-            if (fieldName === 'confirmPassword') {
-                if (!confirmPassword.value) {
-                    message = 'Please confirm your password.';
-                } else if (confirmPassword.value !== password.value) {
-                    message = 'Passwords do not match.';
-                }
-            }
-
-            if (fieldName === 'terms') {
-                if (!terms.checked) {
-                    message = 'You must agree to the terms and privacy policy.';
-                }
-            }
-
-            errors[fieldName].textContent = message;
-            return !message;
-        }
-
-        [fullName, email, password, confirmPassword].forEach((field) => {
-            field.addEventListener('input', () => {
-                validateField(field.name);
-                if (field.name === 'password' || field.name === 'confirmPassword') {
-                    validateField('confirmPassword');
-                }
-            });
-        });
-
-        passwordToggles.forEach((toggle) => {
-            toggle.addEventListener('click', () => {
-                const targetId = toggle.getAttribute('data-target');
-                const targetInput = document.getElementById(targetId);
-                const icon = toggle.querySelector('i');
-
-                if (targetInput.type === 'password') {
-                    targetInput.type = 'text';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    targetInput.type = 'password';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            });
-        });
-
-        terms.addEventListener('change', () => validateField('terms'));
-
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            successMessage.textContent = '';
-
-            const isValid = [
-                validateField('fullName'),
-                validateField('email'),
-                validateField('password'),
-                validateField('confirmPassword'),
-                validateField('terms')
-            ].every(Boolean);
-
-            if (isValid) {
-                const userProfile = {
-                    fullName: fullName.value.trim(),
-                    email: email.value.trim(),
-                    password: password.value
-                };
-                setLoginSuccessRedirect(userProfile);
-            }
-        });
-    </script>
+    
+    <script src="./js/backend.js"></script>
 </body>
 </html>
