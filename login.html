@@ -297,14 +297,14 @@
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input id="email" name="email" type="email" placeholder="you@example.com">
+                        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="username">
                     <div class="error-text" id="emailError"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="password-wrapper">
-                        <input id="password" name="password" type="password" placeholder="Create a strong password">
+                        <input id="password" name="password" type="password" placeholder="Create a strong password" autocomplete="current-password">
                         <button type="button" class="password-toggle" data-target="password" aria-label="Show password"><i class="far fa-eye"></i></button>
                     </div>
                     <div class="error-text" id="passwordError"></div>
@@ -312,6 +312,7 @@
 
                 <button type="submit" class="login-btn">Login</button>
                 <p class="form-footer">New to Trendy Store? <a href="./register.html">Create an account</a></p>
+                <p class="form-footer">Store administrator? <a href="./admin/admin.html">Admin Login</a></p>
                 <p class="form-footer">Return to the store <a href="./index.html">Home</a></p>
                 <div class="success-message" id="successMessage"></div>
             </form>
@@ -328,6 +329,6 @@
     </footer>
 
     
-    <script src="./js/backend.js"></script>
+    <script src="./js/backend.js?v=admin-redirect-1"></script>
 </body>
 </html>

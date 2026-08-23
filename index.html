@@ -1390,14 +1390,8 @@
         function updateLoginVisibility() {
             const loginLink = document.getElementById('navLoginLink');
             const profileLink = document.querySelector('.nav-profile-link');
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-            if (userProfile.fullName) {
-                if (loginLink) loginLink.style.display = 'none';
-                if (profileLink) profileLink.style.display = 'flex';
-            } else {
-                if (loginLink) loginLink.style.display = 'inline-flex';
-                if (profileLink) profileLink.style.display = 'none';
-            }
+            if (loginLink) loginLink.style.display = 'inline-flex';
+            if (profileLink) profileLink.style.display = 'none';
         }
 
         function getUserProfile() {
@@ -1466,14 +1460,6 @@
         }
 
         const loginSuccessMessage = localStorage.getItem('loginSuccessMessage');
-        const storedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-        if (storedProfile.fullName) {
-            const initial = storedProfile.fullName.charAt(0).toUpperCase();
-            const nameEl = document.getElementById('homeProfileName');
-            const initialEl = document.getElementById('homeProfileInitial');
-            if (nameEl) nameEl.textContent = storedProfile.fullName.split(' ')[0];
-            if (initialEl) initialEl.textContent = initial;
-        }
         if (loginSuccessMessage) {
             window.addEventListener('load', () => {
                 showAlert(loginSuccessMessage);
