@@ -235,7 +235,7 @@
         <p>Use the form to choose an inquiry category and tell us what you need. Providing a few details up front helps us route your request faster.</p>
       </div>
 
-      <form class="inquiry-form" id="inquiryForm">
+      <form class="inquiry-form" id="inquiryForm" onsubmit="handleSubmitInquiry(event)">
         <h2>Send an Inquiry</h2>
 
         <label for="inquiry-name">Name</label>
@@ -356,6 +356,5 @@
       });
     });
   </script>
-    <script src="./js/backend.js"></script>
 </body>
 </html>

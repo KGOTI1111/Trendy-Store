@@ -52,9 +52,29 @@
         .profile-title .avatar-large { width: 64px; height: 64px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; }
         .profile-title h1 { font-family: 'Playfair Display', serif; font-size: 28px; }
         .profile-title p { color: rgba(255,255,255,0.8); margin-top: 4px; }
-        .profile-body { padding: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .profile-body { padding: 32px; }
+        .profile-tabs { display: flex; gap: 4px; padding: 6px; border-bottom: 1px solid rgba(0,0,0,0.08); background: #f5f5f5; }
+        .profile-tab { flex: 1; min-height: 44px; border: 0; border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 700; cursor: pointer; }
+        .profile-tab[aria-selected="true"] { background: var(--primary); color: white; }
+        .profile-tab:focus-visible { outline: 3px solid rgba(184,144,71,0.5); outline-offset: 2px; }
+        .tab-panel[hidden] { display: none; }
+        .profile-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .section-box { background: #fcfcfc; border: 1px solid rgba(0,0,0,0.05); border-radius: 16px; padding: 24px; }
         .section-box h3 { margin-bottom: 16px; font-size: 18px; }
+        .order-history { grid-column: 1 / -1; }
+        .order-count { display: flex; justify-content: space-between; align-items: center; margin: -4px 0 16px; color: var(--text-muted); font-size: 14px; }
+        .order-count strong { color: var(--text-main); font-size: 18px; }
+        .order-list { display: grid; gap: 12px; }
+        .order-item { padding: 16px; border: 1px solid rgba(0,0,0,0.08); border-radius: 12px; background: white; }
+        .order-summary { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+        .order-summary strong { display: block; font-size: 14px; }
+        .order-meta { margin-top: 5px; color: var(--text-muted); font-size: 12px; }
+        .order-status { flex: 0 0 auto; padding: 6px 10px; border-radius: 999px; background: #e8f3eb; color: #287043; font-size: 12px; font-weight: 700; }
+        .order-products { margin: 14px 0 0; padding-left: 18px; color: var(--text-muted); font-size: 13px; }
+        .order-total { margin-top: 12px; font-weight: 700; font-size: 14px; }
+        .order-details-link { display: inline-flex; margin-top: 12px; padding: 8px 12px; border: 1px solid var(--primary); border-radius: 8px; background: white; color: var(--primary); font-size: 13px; font-weight: 700; text-decoration: none; }
+        .order-details-link:hover { background: var(--primary); color: white; }
+        .empty-orders { color: var(--text-muted); font-size: 14px; }
         .info-item { margin-bottom: 12px; }
         .info-item strong { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
         .info-item span { font-size: 15px; color: var(--text-main); }
@@ -76,8 +96,14 @@
         @keyframes slideInUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         @media (max-width: 850px) {
-            .profile-body { grid-template-columns: 1fr; }
+            .profile-columns { grid-template-columns: 1fr; }
             .profile-header { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 520px) {
+            .page { padding: 24px 12px 40px; }
+            .profile-body, .profile-header { padding: 22px; }
+            .section-box { padding: 18px; }
+            .order-summary { flex-direction: column; }
         }
     </style>
 </head>
@@ -103,51 +129,62 @@
                         <p id="profileEmail">your@email.com</p>
                     </div>
                 </div>
-                <div class="profile-status">Logged in successfully</div>
+                <div class="profile-status"></div>
                 <button class="save-btn" id="logoutBtn" type="button">Logout</button>
             </div>
+            <div class="profile-tabs" role="tablist" aria-label="Account sections">
+                <button class="profile-tab" id="profileTab" type="button" role="tab" aria-selected="true" aria-controls="profilePanel" tabindex="0">Profile</button>
+                <button class="profile-tab" id="ordersTab" type="button" role="tab" aria-selected="false" aria-controls="ordersPanel" tabindex="-1">Order Details</button>
+            </div>
             <div class="profile-body">
-                <div class="section-box">
-                    <h3>Your Details</h3>
-                    <div class="info-item"><strong>Full Name</strong><span id="displayName">-</span></div>
-                    <div class="info-item"><strong>Email</strong><span id="displayEmail">-</span></div>
-                    <div class="info-item"><strong>Password</strong><span>********</span></div>
-                </div>
-                <div class="section-box">
-                    <h3>Edit Profile</h3>
-                    <form id="profileForm" novalidate>
-                        <div class="form-group">
-                            <label for="editFullName">Full Name</label>
-                            <input id="editFullName" name="fullName" type="text" autocomplete="name">
-                            <div class="error-text" id="fullNameError"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="editEmail">Email Address</label>
-                            <input id="editEmail" name="email" type="email" autocomplete="email">
-                            <div class="error-text" id="emailError"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="editPassword">Password</label>
-                            <div class="password-wrapper">
-                                <input id="editPassword" name="password" type="password" autocomplete="new-password">
-                                <button type="button" class="password-toggle" data-target="editPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                <section class="tab-panel profile-columns" id="profilePanel" role="tabpanel" aria-labelledby="profileTab">
+                    <div class="section-box">
+                        <h3>Your Details</h3>
+                        <div class="info-item"><strong>Full Name</strong><span id="displayName">-</span></div>
+                        <div class="info-item"><strong>Email</strong><span id="displayEmail">-</span></div>
+                        <div class="info-item"><strong>Password</strong><span id="displayPassword">Not set</span></div>
+                    </div>
+                    <div class="section-box">
+                        <h3>Edit Profile</h3>
+                        <form id="profileForm" novalidate>
+                            <div class="form-group">
+                                <label for="editFullName">Full Name</label>
+                                <input id="editFullName" name="fullName" type="text">
+                                <div class="error-text" id="fullNameError"></div>
                             </div>
-                            <div class="error-text" id="passwordError"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="editConfirmPassword">Confirm Password</label>
-                            <div class="password-wrapper">
-                                <input id="editConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password">
-                                <button type="button" class="password-toggle" data-target="editConfirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                            <div class="form-group">
+                                <label for="editEmail">Email Address</label>
+                                <input id="editEmail" name="email" type="email">
+                                <div class="error-text" id="emailError"></div>
                             </div>
-                            <div class="error-text" id="confirmPasswordError"></div>
-                        </div>
-                        <label class="checkbox-row"><input type="checkbox" id="editTerms" name="terms"><span>I agree to the privacy policy and terms.</span></label>
-                        <div class="error-text" id="termsError"></div>
-                        <button type="submit" class="save-btn">Save Changes</button>
-                        <div class="message" id="formMessage"></div>
-                    </form>
-                </div>
+                            <div class="form-group">
+                                <label for="editPassword">Password</label>
+                                <div class="password-wrapper">
+                                    <input id="editPassword" name="password" type="password" autocomplete="new-password" placeholder="Leave blank to keep current password">
+                                    <button type="button" class="password-toggle" data-target="editPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                                </div>
+                                <div class="error-text" id="passwordError"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="editConfirmPassword">Confirm Password</label>
+                                <div class="password-wrapper">
+                                    <input id="editConfirmPassword" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Enter only when changing password">
+                                    <button type="button" class="password-toggle" data-target="editConfirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                                </div>
+                                <div class="error-text" id="confirmPasswordError"></div>
+                            </div>
+                            <button type="submit" class="save-btn">Save Changes</button>
+                            <div class="message" id="formMessage"></div>
+                        </form>
+                    </div>
+                </section>
+                <section class="tab-panel" id="ordersPanel" role="tabpanel" aria-labelledby="ordersTab" hidden>
+                    <section class="section-box order-history" aria-labelledby="ordersHeading">
+                        <h3 id="ordersHeading">Order History</h3>
+                        <div class="order-count"><span>Total orders</span><strong id="totalOrderCount">0</strong></div>
+                        <div class="order-list" id="orderList" aria-live="polite"></div>
+                    </section>
+                </section>
             </div>
         </section>
     </main>
@@ -157,7 +194,287 @@
         <span id="alertMsg">Message goes here</span>
     </div>
 
-    
-    <script src="./js/backend.js"></script>
+    <script>
+        let profileData = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const form = document.getElementById('profileForm');
+        const fullNameInput = document.getElementById('editFullName');
+        const emailInput = document.getElementById('editEmail');
+        const passwordInput = document.getElementById('editPassword');
+        const confirmPasswordInput = document.getElementById('editConfirmPassword');
+        const profileTabs = Array.from(document.querySelectorAll('[role="tab"]'));
+        const errors = {
+            fullName: document.getElementById('fullNameError'),
+            email: document.getElementById('emailError'),
+            password: document.getElementById('passwordError'),
+            confirmPassword: document.getElementById('confirmPasswordError')
+        };
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('customAlert');
+            document.getElementById('alertMsg').textContent = message;
+            alertBox.style.display = 'flex';
+            setTimeout(() => { alertBox.style.display = 'none'; }, 2500);
+        }
+
+        function validateField(fieldName) {
+            let message = '';
+            if (fieldName === 'fullName') {
+                if (!fullNameInput.value.trim()) message = 'Full name is required.';
+                else if (fullNameInput.value.trim().length < 3) message = 'Full name must contain at least 3 characters.';
+            }
+            if (fieldName === 'email') {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailInput.value.trim()) message = 'Email is required.';
+                else if (!emailPattern.test(emailInput.value.trim())) message = 'Please enter a valid email address.';
+            }
+            if (fieldName === 'password') {
+                if (passwordInput.value && passwordInput.value.length < 8) message = 'Password must be at least 8 characters.';
+                else if (passwordInput.value && (!/[A-Z]/.test(passwordInput.value) || !/[0-9]/.test(passwordInput.value) || !/[^A-Za-z0-9]/.test(passwordInput.value))) {
+                    message = 'Password must include an uppercase letter, a number, and a special character.';
+                }
+            }
+            if (fieldName === 'confirmPassword') {
+                if (passwordInput.value && !confirmPasswordInput.value) message = 'Please confirm your new password.';
+                else if (confirmPasswordInput.value !== passwordInput.value) message = 'Passwords do not match.';
+            }
+            errors[fieldName].textContent = message;
+            return !message;
+        }
+
+        function populateProfile() {
+            profileData = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const fullName = profileData.fullName || 'User';
+            const email = profileData.email || 'your@email.com';
+            document.getElementById('displayName').textContent = fullName;
+            document.getElementById('displayEmail').textContent = email;
+            document.getElementById('profileName').textContent = fullName;
+            document.getElementById('profileEmail').textContent = email;
+            document.getElementById('navUserName').textContent = fullName.split(' ')[0];
+            document.getElementById('avatarInitial').textContent = fullName.charAt(0).toUpperCase();
+            document.getElementById('avatarLarge').textContent = fullName.charAt(0).toUpperCase();
+            document.getElementById('displayPassword').textContent = profileData.hasPassword ? '********' : 'Not set';
+            fullNameInput.value = fullName;
+            emailInput.value = email;
+            passwordInput.value = '';
+            confirmPasswordInput.value = '';
+            renderOrders();
+        }
+
+        function syncUserDirectory(updatedProfile, previousEmail) {
+            let users = [];
+            try {
+                const savedUsers = JSON.parse(localStorage.getItem('storeUsers') || '[]');
+                if (Array.isArray(savedUsers)) users = savedUsers;
+            } catch (error) {
+                users = [];
+            }
+            const oldEmail = (previousEmail || '').trim().toLowerCase();
+            const nextEmail = updatedProfile.email.trim().toLowerCase();
+            let userIndex = users.findIndex((user) => (user.email || '').trim().toLowerCase() === oldEmail);
+            if (userIndex < 0) userIndex = users.findIndex((user) => (user.email || '').trim().toLowerCase() === nextEmail);
+            const existingUser = userIndex >= 0 ? users[userIndex] : {};
+            const now = new Date().toISOString();
+            const directoryRecord = {
+                ...existingUser,
+                id: existingUser.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                fullName: updatedProfile.fullName,
+                email: updatedProfile.email,
+                createdAt: existingUser.createdAt || now,
+                lastLogin: existingUser.lastLogin || ''
+            };
+            if (userIndex >= 0) users[userIndex] = directoryRecord;
+            else users.push(directoryRecord);
+            localStorage.setItem('storeUsers', JSON.stringify(users));
+        }
+
+        let accountOrders = [];
+
+        async function loadAccountOrders() {
+            const response = await fetch('./api/orders.php', { credentials: 'same-origin', cache: 'no-store' });
+            const result = await response.json();
+            if (!response.ok || result.success !== true) {
+                throw new Error(result.message || 'Order history could not be loaded.');
+            }
+            accountOrders = result.data;
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const orderList = document.getElementById('orderList');
+            const matchingOrders = accountOrders.map((order) => ({ order }));
+
+            document.getElementById('totalOrderCount').textContent = matchingOrders.length;
+            orderList.replaceChildren();
+            if (!matchingOrders.length) {
+                const emptyMessage = document.createElement('p');
+                emptyMessage.className = 'empty-orders';
+                emptyMessage.textContent = 'No orders found for this account yet.';
+                orderList.appendChild(emptyMessage);
+                return;
+            }
+
+            matchingOrders.forEach(({ order }, index) => {
+                const orderCard = document.createElement('article');
+                orderCard.className = 'order-item';
+
+                const summary = document.createElement('div');
+                summary.className = 'order-summary';
+                const details = document.createElement('div');
+                const orderTitle = document.createElement('strong');
+                orderTitle.textContent = `Order ${matchingOrders.length - index}`;
+                const orderMeta = document.createElement('p');
+                orderMeta.className = 'order-meta';
+                const orderDate = order.date ? new Date(order.date) : null;
+                orderMeta.textContent = orderDate && !Number.isNaN(orderDate.getTime())
+                    ? `Placed ${orderDate.toLocaleDateString()} | ${order.paymentMethod || 'Payment not specified'}`
+                    : `Date unavailable | ${order.paymentMethod || 'Payment not specified'}`;
+                const status = document.createElement('span');
+                status.className = 'order-status';
+                status.textContent = order.status || 'Order placed';
+                details.append(orderTitle, orderMeta);
+                summary.append(details, status);
+                orderCard.appendChild(summary);
+
+                const products = document.createElement('ul');
+                products.className = 'order-products';
+                (Array.isArray(order.items) ? order.items : []).forEach((item) => {
+                    const product = document.createElement('li');
+                    product.textContent = item.name || 'Product';
+                    products.appendChild(product);
+                });
+                if (products.childElementCount) orderCard.appendChild(products);
+
+                const total = document.createElement('p');
+                total.className = 'order-total';
+                total.textContent = `Total: ${order.total || 'Unavailable'}`;
+                orderCard.appendChild(total);
+
+                const detailsLink = document.createElement('a');
+                detailsLink.className = 'order-details-link';
+                detailsLink.href = `./orderdetails.html?orderId=${order.id}`;
+                detailsLink.textContent = 'View order details';
+                orderCard.appendChild(detailsLink);
+                orderList.appendChild(orderCard);
+            });
+        }
+
+        async function logoutUser() {
+            try {
+                await fetch('./user-auth.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'logout' })
+                });
+            } catch (error) {
+                console.error('Could not invalidate the account session.', error);
+            }
+            localStorage.removeItem('userProfile');
+            localStorage.removeItem('loginSuccessMessage');
+            window.location.href = './index.html';
+        }
+
+        function activateProfileTab(selectedTab, moveFocus = false) {
+            profileTabs.forEach((tab) => {
+                const isSelected = tab === selectedTab;
+                tab.setAttribute('aria-selected', String(isSelected));
+                tab.tabIndex = isSelected ? 0 : -1;
+                document.getElementById(tab.getAttribute('aria-controls')).hidden = !isSelected;
+            });
+            if (moveFocus) selectedTab.focus();
+        }
+
+        profileTabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => activateProfileTab(tab));
+            tab.addEventListener('keydown', (event) => {
+                let nextIndex = index;
+                if (event.key === 'ArrowRight') nextIndex = (index + 1) % profileTabs.length;
+                else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + profileTabs.length) % profileTabs.length;
+                else if (event.key === 'Home') nextIndex = 0;
+                else if (event.key === 'End') nextIndex = profileTabs.length - 1;
+                else return;
+                event.preventDefault();
+                activateProfileTab(profileTabs[nextIndex], true);
+            });
+        });
+
+        [fullNameInput, emailInput, passwordInput, confirmPasswordInput].forEach((field) => {
+            field.addEventListener('input', () => {
+                validateField(field.name);
+                if (field.name === 'password' || field.name === 'confirmPassword') validateField('confirmPassword');
+            });
+        });
+
+        document.querySelectorAll('.password-toggle').forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = toggle.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const isValid = [
+                validateField('fullName'),
+                validateField('email'),
+                validateField('password'),
+                validateField('confirmPassword')
+            ].every(Boolean);
+            if (!isValid) return;
+
+            const submitButton = form.querySelector('[type="submit"]');
+            submitButton.disabled = true;
+            const previousEmail = profileData.email;
+            try {
+                const response = await fetch('./user-auth.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update-profile',
+                        fullName: fullNameInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        password: passwordInput.value
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Could not update profile.');
+                profileData = result.user;
+                localStorage.setItem('userProfile', JSON.stringify(profileData));
+                syncUserDirectory(profileData, previousEmail);
+                populateProfile();
+                loadAccountOrders().catch((error) => {
+                    const orderList = document.getElementById('orderList');
+                    const message = document.createElement('p');
+                    message.className = 'empty-orders';
+                    message.textContent = error.message;
+                    orderList.replaceChildren(message);
+                });
+                document.getElementById('formMessage').textContent = result.message || 'Profile saved successfully.';
+                showAlert('Profile updated successfully!');
+            } catch (error) {
+                document.getElementById('formMessage').textContent = error.message || 'The account service is unavailable.';
+                document.getElementById('formMessage').style.color = '#c74b4b';
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+        populateProfile();
+        if (new URLSearchParams(window.location.search).get('tab') === 'orders') {
+            activateProfileTab(document.getElementById('ordersTab'));
+        }
+    </script>
 </body>
 </html>

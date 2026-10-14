@@ -156,6 +156,9 @@
             box-shadow: 0 12px 24px rgba(184, 144, 71, 0.25);
         }
 
+        .nav-admin-btn { background: var(--primary); margin-left: 5px; }
+        .nav-admin-btn:hover { background: var(--accent); color: white; }
+
         .nav-icons {
             display: flex;
             gap: 20px;
@@ -862,7 +865,6 @@
             <li><a href="./Contactus.html">Contact Us</a></li>
             <li><a href="./InquiryMenu.html">Inquiry Here</a></li>
             <li><a id="navLoginLink" href="./login.html" class="nav-login-btn">Login</a></li>
-            <!--<li><a id="navRegisterLink" href="./register.html" class="nav-login-btn">Register</a></li>-->
         </ul>
         <div class="nav-search">
             <form id="searchForm">
@@ -973,7 +975,18 @@
 
     <!-- -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            const adminSetup = new URLSearchParams(window.location.search).get('adminSetup');
+            if (adminSetup === 'catalog' || adminSetup === 'dashboard') {
+                window.location.replace(adminSetup === 'catalog' ? './admin/manageproduct.php' : './admin/index.php');
+                return;
+            }
+            try {
+                await loadDatabaseCatalog();
+            } catch (error) {
+                products = [];
+                document.getElementById('searchStatus').textContent = `The store catalog could not be loaded: ${error.message}`;
+            }
             displayProducts();
             updateWishlistCount();
             updateCartCount();
@@ -984,7 +997,7 @@
 
         // Highly Curated 15 Product Database (5 Watches, 5 Goggles, 5 Perfumes)
         // Prices have been updated to premium Indian Rupee values with proper localization.
-        const products = [
+        const defaultProducts = [
             // WATCHES
             { 
                 id: 1, 
@@ -1174,6 +1187,51 @@
             },
         ];
 
+        let products = [];
+
+        async function loadDatabaseCatalog() {
+            const [productsResponse, categoriesResponse] = await Promise.all([
+                fetch('./api/products.php', { credentials: 'same-origin', cache: 'no-store' }),
+                fetch('./api/categories.php', { credentials: 'same-origin', cache: 'no-store' })
+            ]);
+            const [productsResult, categoriesResult] = await Promise.all([
+                productsResponse.json(),
+                categoriesResponse.json()
+            ]);
+            if (!productsResponse.ok || productsResult.success !== true) {
+                throw new Error(productsResult.message || 'Products are unavailable.');
+            }
+            if (!categoriesResponse.ok || categoriesResult.success !== true) {
+                throw new Error(categoriesResult.message || 'Product categories are unavailable.');
+            }
+
+            products = productsResult.data.map((product) => ({
+                ...product,
+                id: Number(product.id),
+                price: Number(product.price)
+            }));
+
+            const filter = document.querySelector('.category-filter');
+            filter.replaceChildren();
+            const allButton = document.createElement('button');
+            allButton.className = 'filter-btn active';
+            allButton.dataset.category = 'all';
+            allButton.type = 'button';
+            allButton.textContent = 'All Products';
+            allButton.addEventListener('click', () => filterProducts('all'));
+            filter.appendChild(allButton);
+
+            categoriesResult.data.forEach((category) => {
+                const button = document.createElement('button');
+                button.className = 'filter-btn';
+                button.dataset.category = category.name;
+                button.type = 'button';
+                button.textContent = category.name;
+                button.addEventListener('click', () => filterProducts(category.name));
+                filter.appendChild(button);
+            });
+        }
+
         // Format Indian Rupee currency format (e.g. ₹24,999)
         function formatRupee(amount) {
             return new Intl.NumberFormat('en-IN', {
@@ -1181,6 +1239,16 @@
                 currency: 'INR',
                 maximumFractionDigits: 0
             }).format(amount);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[character]);
         }
 
         const fallbackImage = 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200';
@@ -1236,15 +1304,15 @@
             const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
             
             filtered.forEach(p => {
-                        const imageSrc = p.img || fallbackImage;
+                const imageSrc = escapeHtml(p.img || fallbackImage);
                 grid.innerHTML += `
                     <div class="product-card" onclick="openModal(${p.id})">
                         <div class="product-img-wrapper">
-                            <span class="badge-category">${p.category}</span>
-                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
+                            <span class="badge-category">${escapeHtml(p.category)}</span>
+                            <img src="${imageSrc}" alt="${escapeHtml(p.name)}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
                         </div>
                         <div class="product-info">
-                            <h3>${p.name}</h3>
+                            <h3>${escapeHtml(p.name)}</h3>
                             <div class="price">${formatRupee(p.price)}</div>
                         </div>
                     </div>
@@ -1270,9 +1338,9 @@
             document.getElementById('modalTitle').innerText = currentProduct.name;
             document.getElementById('modalPrice').innerText = formatRupee(currentProduct.price);
             document.getElementById('modalDesc').innerText = currentProduct.desc;
-            document.getElementById('modalSales').innerHTML = `<i class="fas fa-chart-line"></i> ${currentProduct.sales} Sold Last Month`;
-            document.getElementById('modalRating').innerHTML = `<i class="fas fa-star"></i> ${currentProduct.rating}`;
-            document.getElementById('modalReview').innerHTML = currentProduct.review;
+            document.getElementById('modalSales').innerHTML = `<i class="fas fa-chart-line"></i> ${escapeHtml(currentProduct.sales || '0')} Sold Last Month`;
+            document.getElementById('modalRating').innerHTML = `<i class="fas fa-star"></i> ${escapeHtml(currentProduct.rating || 'New')}`;
+            document.getElementById('modalReview').textContent = currentProduct.review || '';
             
             const mainImg = document.getElementById('modalMainImg');
             mainImg.src = resolveImageUrl(currentProduct.img);
@@ -1282,14 +1350,16 @@
 
             // Generate gallery thumbnails
             const thumbs = document.getElementById('modalThumbs');
-            thumbs.innerHTML = '';
-            currentProduct.gallery.forEach((imgUrl, index) => {
-                const activeClass = index === 0 ? 'active' : '';
+            thumbs.replaceChildren();
+            (Array.isArray(currentProduct.gallery) && currentProduct.gallery.length ? currentProduct.gallery : [currentProduct.img]).forEach((imgUrl, index) => {
                 const resolvedThumbUrl = resolveImageUrl(imgUrl);
-                thumbs.innerHTML += `
-                    <img src="${resolvedThumbUrl}" class="thumb-img ${activeClass}" 
-                         onclick="changeMainImage('${resolvedThumbUrl}', this)" onerror="this.onerror=null; this.src='${fallbackImage}';">
-                `;
+                const thumbnail = document.createElement('img');
+                thumbnail.src = resolvedThumbUrl;
+                thumbnail.alt = `${currentProduct.name} image ${index + 1}`;
+                thumbnail.className = `thumb-img${index === 0 ? ' active' : ''}`;
+                thumbnail.addEventListener('click', () => changeMainImage(imgUrl, thumbnail));
+                thumbnail.addEventListener('error', () => { thumbnail.src = fallbackImage; }, { once: true });
+                thumbs.appendChild(thumbnail);
             });
 
             document.getElementById('productModal').style.display = 'flex';
@@ -1390,8 +1460,14 @@
         function updateLoginVisibility() {
             const loginLink = document.getElementById('navLoginLink');
             const profileLink = document.querySelector('.nav-profile-link');
-            if (loginLink) loginLink.style.display = 'inline-flex';
-            if (profileLink) profileLink.style.display = 'none';
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (userProfile.fullName) {
+                if (loginLink) loginLink.style.display = 'none';
+                if (profileLink) profileLink.style.display = 'flex';
+            } else {
+                if (loginLink) loginLink.style.display = 'inline-flex';
+                if (profileLink) profileLink.style.display = 'none';
+            }
         }
 
         function getUserProfile() {
@@ -1432,10 +1508,7 @@
             }
             cart.push(product);
             saveCart(cart);
-            showAlert(`"${product.name}" added to your cart.`);
-            setTimeout(() => {
-                window.location.href = './index.html';
-            }, 700);
+            window.location.href = './index.html';
         }
 
         function addToWishlist(product) {
@@ -1454,16 +1527,28 @@
             saveWishlist(wishlist);
             showAlert(`"${product.name}" added to your Wishlist.`);
             closeModal();
-            setTimeout(() => {
-                window.location.href = './index.html';
-            }, 700);
         }
 
         const loginSuccessMessage = localStorage.getItem('loginSuccessMessage');
+        const storedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        if (storedProfile.fullName) {
+            const initial = storedProfile.fullName.charAt(0).toUpperCase();
+            const nameEl = document.getElementById('homeProfileName');
+            const initialEl = document.getElementById('homeProfileInitial');
+            if (nameEl) nameEl.textContent = storedProfile.fullName.split(' ')[0];
+            if (initialEl) initialEl.textContent = initial;
+        }
         if (loginSuccessMessage) {
             window.addEventListener('load', () => {
                 showAlert(loginSuccessMessage);
                 localStorage.removeItem('loginSuccessMessage');
+            });
+        }
+        const orderSuccessMessage = sessionStorage.getItem('orderSuccessMessage');
+        if (orderSuccessMessage) {
+            window.addEventListener('load', () => {
+                showAlert(orderSuccessMessage);
+                sessionStorage.removeItem('orderSuccessMessage');
             });
         }
 
@@ -1537,15 +1622,15 @@
                 return;
             }
             items.forEach(p => {
-                const imageSrc = p.img || fallbackImage;
+                const imageSrc = escapeHtml(p.img || fallbackImage);
                 grid.innerHTML += `
                     <div class="product-card" onclick="openModal(${p.id})">
                         <div class="product-img-wrapper">
-                            <span class="badge-category">${p.category}</span>
-                            <img src="${imageSrc}" alt="${p.name}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
+                            <span class="badge-category">${escapeHtml(p.category)}</span>
+                            <img src="${imageSrc}" alt="${escapeHtml(p.name)}" class="product-img" loading="lazy" onerror="this.onerror=null; this.src='${fallbackImage}';">
                         </div>
                         <div class="product-info">
-                            <h3>${p.name}</h3>
+                            <h3>${escapeHtml(p.name)}</h3>
                             <div class="price">${formatRupee(p.price)}</div>
                         </div>
                     </div>
@@ -1619,6 +1704,5 @@
             showHeroSlide(heroIndex);
         }, 2000);
     </script>
-    <script src="./js/backend.js"></script>
 </body>
 </html>

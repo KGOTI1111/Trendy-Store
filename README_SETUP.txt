@@ -14,7 +14,7 @@ TrendyStore/
 ├── wishlist.html
 ├── Contactus.html
 ├── InquiryMenu.html
-├── database.sql
+├── trendy_store.sql
 ├── js/
 │   └── backend.js
 ├── api/
@@ -54,12 +54,14 @@ Open:
 
 `http://localhost/phpmyadmin`
 
-Go to **SQL**, paste the complete contents of `database.sql`, and click **Go**.
+Go to **SQL**, import `trendy_store.sql`, and click **Go**. The dump selects or creates the `trendy_store` database and includes the tables used by the storefront and admin area.
 
 The SQL creates:
 
 - `trendy_store`
+- `admin_users`
 - `users`
+- `categories`
 - `products`
 - `wishlist`
 - `cart`
@@ -67,6 +69,17 @@ The SQL creates:
 - `order_items`
 - `contact_messages`
 - `inquiries`
+
+The admin console is available at `http://localhost/TrendyStore/admin/`. Admin product/category/order/user operations use these MySQL tables. Product visibility is stored in `products.is_active`; hidden products remain in the database and order history but are excluded from the storefront catalog and new checkouts.
+
+The SQL dump seeds an admin record with a hashed password. After importing, run `.\admin\set-admin-password.ps1` from the project folder and enter that record's email and a new password before signing in.
+
+For an existing `trendy_store` database, apply this once in phpMyAdmin's SQL tab before using the updated admin catalog:
+
+```sql
+ALTER TABLE products MODIFY id INT(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 1;
+```
 
 It also inserts the products that were present in the uploaded Trendy Store project.
 

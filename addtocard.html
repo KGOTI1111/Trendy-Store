@@ -118,6 +118,11 @@
 
         function removeFromCart(id) {
             const updated = getCart().filter(item => item.id !== id);
+            if (!updated.length) {
+                localStorage.setItem('cart', JSON.stringify([]));
+                window.location.replace('./index.html');
+                return;
+            }
             saveCart(updated);
             showAlert('Product removed from your cart.');
         }
@@ -144,8 +149,7 @@
             const cart = getCart();
             cartGrid.innerHTML = '';
             if (!cart.length) {
-                emptyState.style.display = 'block';
-                checkoutPanel.style.display = 'none';
+                window.location.replace('./index.html');
                 return;
             }
             emptyState.style.display = 'none';
@@ -156,21 +160,41 @@
                 total += product.price;
                 const card = document.createElement('div');
                 card.className = 'cart-card';
-                card.innerHTML = `
-                    <img src="${product.img}" alt="${product.name}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200';">
-                    <div class="cart-content">
-                        <h2>${product.name}</h2>
-                        <div class="meta">
-                            <span>${product.category}</span>
-                            <span class="price">${new Intl.NumberFormat('en-IN', {style:'currency',currency:'INR',maximumFractionDigits:0}).format(product.price)}</span>
-                        </div>
-                        <p>${product.desc}</p>
-                        <div class="cart-actions">
-                            <button class="cart-btn btn-remove" onclick="removeFromCart(${product.id})">Remove</button>
-                            <button class="cart-btn btn-back" onclick="buySingleProduct(${JSON.stringify(product)})">Buy Now</button>
-                        </div>
-                    </div>
-                `;
+                const image = document.createElement('img');
+                image.src = product.img || '';
+                image.alt = product.name || 'Product';
+                image.addEventListener('error', () => { image.hidden = true; }, { once: true });
+
+                const content = document.createElement('div');
+                content.className = 'cart-content';
+                const name = document.createElement('h2');
+                name.textContent = product.name || 'Product';
+                const meta = document.createElement('div');
+                meta.className = 'meta';
+                const category = document.createElement('span');
+                category.textContent = product.category || '';
+                const price = document.createElement('span');
+                price.className = 'price';
+                price.textContent = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price);
+                meta.append(category, price);
+
+                const description = document.createElement('p');
+                description.textContent = product.desc || '';
+                const actions = document.createElement('div');
+                actions.className = 'cart-actions';
+                const removeButton = document.createElement('button');
+                removeButton.className = 'cart-btn btn-remove';
+                removeButton.type = 'button';
+                removeButton.textContent = 'Remove';
+                removeButton.addEventListener('click', () => removeFromCart(product.id));
+                const buyButton = document.createElement('button');
+                buyButton.className = 'cart-btn btn-back';
+                buyButton.type = 'button';
+                buyButton.textContent = 'Buy Now';
+                buyButton.addEventListener('click', () => buySingleProduct(product));
+                actions.append(removeButton, buyButton);
+                content.append(name, meta, description, actions);
+                card.append(image, content);
                 cartGrid.appendChild(card);
             });
 
@@ -180,6 +204,5 @@
 
         renderCart();
     </script>
-    <script src="./js/backend.js"></script>
 </body>
 </html>

@@ -131,6 +131,10 @@
             margin-bottom: 4px;
         }
 
+        .auth-mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 5px; border-radius: 10px; background: #f2f2f2; }
+        .auth-mode-button { min-height: 40px; border: none; border-radius: 7px; background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 700; cursor: pointer; }
+        .auth-mode-button[aria-pressed="true"] { background: var(--primary); color: white; }
+
         .auth-form .subtitle {
             color: var(--text-muted);
             margin-bottom: 8px;
@@ -141,6 +145,8 @@
             flex-direction: column;
             gap: 6px;
         }
+
+        .form-group[hidden], .checkbox-row[hidden] { display: none; }
 
         .form-group label {
             font-size: 13px;
@@ -239,6 +245,20 @@
             font-weight: 700;
         }
 
+        .admin-login-prompt {
+            margin: 18px 0 0;
+            color: var(--text-muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .admin-login-prompt a {
+            color: var(--accent);
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
         .success-message {
             min-height: 20px;
             color: #2f8f56;
@@ -292,30 +312,54 @@
     <main class="auth-page">
         <section class="auth-card">
             <form id="loginForm" class="auth-form" novalidate>
-                <h2>Welcome Back</h2>
-                <p class="subtitle">Log in to continue shopping.</p>
+                <h2 id="formTitle">Sign in</h2>
+                <p class="subtitle" id="formSubtitle">Sign in to your Trendy Store account.</p>
+                <div class="auth-mode-tabs" role="group" aria-label="Account action">
+                    <button class="auth-mode-button" id="signInModeButton" type="button" aria-pressed="true">Sign in</button>
+                    <button class="auth-mode-button" id="registerModeButton" type="button" aria-pressed="false">Create account</button>
+                </div>
+
+                <div class="form-group" id="fullNameGroup" hidden>
+                    <label for="fullName">Full Name</label>
+                    <input id="fullName" name="fullName" type="text" placeholder="Enter your full name" autocomplete="name">
+                    <div class="error-text" id="fullNameError"></div>
+                </div>
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="username">
+                    <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email">
                     <div class="error-text" id="emailError"></div>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="password-wrapper">
-                        <input id="password" name="password" type="password" placeholder="Create a strong password" autocomplete="current-password">
+                        <input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password">
                         <button type="button" class="password-toggle" data-target="password" aria-label="Show password"><i class="far fa-eye"></i></button>
                     </div>
                     <div class="error-text" id="passwordError"></div>
                 </div>
 
-                <button type="submit" class="login-btn">Login</button>
-                <p class="form-footer">New to Trendy Store? <a href="./register.html">Create an account</a></p>
-                <p class="form-footer">Store administrator? <a href="./admin/admin.html">Admin Login</a></p>
+                <div class="form-group" id="confirmPasswordGroup" hidden>
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Re-enter your password" autocomplete="new-password">
+                        <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                    </div>
+                    <div class="error-text" id="confirmPasswordError"></div>
+                </div>
+
+                <label class="checkbox-row" id="termsRow" hidden>
+                    <input type="checkbox" id="terms" name="terms">
+                    <span>I agree to the privacy policy and terms.</span>
+                </label>
+                <div class="error-text" id="termsError"></div>
+
+                <button type="submit" class="login-btn" id="submitButton">Sign in</button>
                 <p class="form-footer">Return to the store <a href="./index.html">Home</a></p>
                 <div class="success-message" id="successMessage"></div>
             </form>
+            <p class="admin-login-prompt">Want to log in as an admin? <a href="./admin/login.php">Admin login</a></p>
         </section>
     </main>
 
@@ -328,7 +372,235 @@
         © 2026 Trendy Store Luxury Boutique. All rights reserved.
     </footer>
 
-    
-    <script src="./js/backend.js?v=admin-redirect-1"></script>
+    <script>
+        const form = document.getElementById('loginForm');
+        const fullName = document.getElementById('fullName');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const terms = document.getElementById('terms');
+        const successMessage = document.getElementById('successMessage');
+        const passwordToggles = document.querySelectorAll('.password-toggle');
+        const fullNameGroup = document.getElementById('fullNameGroup');
+        const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+        const termsRow = document.getElementById('termsRow');
+        let authMode = new URLSearchParams(window.location.search).get('mode') === 'register' ? 'register' : 'login';
+
+        const errors = {
+            fullName: document.getElementById('fullNameError'),
+            email: document.getElementById('emailError'),
+            password: document.getElementById('passwordError'),
+            confirmPassword: document.getElementById('confirmPasswordError'),
+            terms: document.getElementById('termsError')
+        };
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('customAlert');
+            document.getElementById('alertMsg').textContent = message;
+            alertBox.style.display = 'flex';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 2500);
+        }
+
+        function getLoginRedirectParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                returnUrl: params.get('returnUrl') || './index.html',
+                action: params.get('action') || '',
+                productId: params.get('productId') || ''
+            };
+        }
+
+        function resolveRedirectUrl(rawUrl) {
+            try {
+                return new URL(rawUrl, window.location.href).toString();
+            } catch (error) {
+                return new URL('./index.html', window.location.href).toString();
+            }
+        }
+
+        function setLoginSuccessRedirect(userProfile, message) {
+            const { returnUrl, action, productId } = getLoginRedirectParams();
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            localStorage.setItem('loginSuccessMessage', message);
+
+            const redirectUrl = new URL(resolveRedirectUrl(returnUrl));
+            if (action) redirectUrl.searchParams.set('action', action);
+            if (productId) redirectUrl.searchParams.set('productId', productId);
+            redirectUrl.searchParams.set('login', 'success');
+            window.location.href = redirectUrl.toString();
+        }
+
+        function redirectLoggedInUserAway() {
+            const existingUser = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            const params = new URLSearchParams(window.location.search);
+            const hasReturnUrl = Boolean(params.get('returnUrl'));
+
+            if (existingUser.fullName && !hasReturnUrl) {
+                window.location.href = './index.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', redirectLoggedInUserAway);
+
+        function validateField(fieldName) {
+            let message = '';
+
+            if (authMode === 'register' && fieldName === 'fullName') {
+                if (!fullName.value.trim()) {
+                    message = 'Full name is required.';
+                } else if (fullName.value.trim().length < 3) {
+                    message = 'Full name must contain at least 3 characters.';
+                }
+            }
+
+            if (fieldName === 'email') {
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email.value.trim()) {
+                    message = 'Email is required.';
+                } else if (!emailPattern.test(email.value.trim())) {
+                    message = 'Please enter a valid email address.';
+                }
+            }
+
+            if (fieldName === 'password') {
+                if (!password.value) {
+                    message = 'Password is required.';
+                } else if (authMode === 'register' && password.value.length < 8) {
+                    message = 'Password must be at least 8 characters.';
+                } else if (authMode === 'register' && (!/[A-Z]/.test(password.value) || !/[0-9]/.test(password.value) || !/[^A-Za-z0-9]/.test(password.value))) {
+                    message = 'Password must include an uppercase letter, a number, and a special character.';
+                }
+            }
+
+            if (authMode === 'register' && fieldName === 'confirmPassword') {
+                if (!confirmPassword.value) {
+                    message = 'Please confirm your password.';
+                } else if (confirmPassword.value !== password.value) {
+                    message = 'Passwords do not match.';
+                }
+            }
+
+            if (authMode === 'register' && fieldName === 'terms') {
+                if (!terms.checked) {
+                    message = 'You must agree to the terms and privacy policy.';
+                }
+            }
+
+            errors[fieldName].textContent = message;
+            return !message;
+        }
+
+        function setAuthMode(mode) {
+            authMode = mode;
+            const isRegister = mode === 'register';
+            fullNameGroup.hidden = !isRegister;
+            confirmPasswordGroup.hidden = !isRegister;
+            termsRow.hidden = !isRegister;
+            fullName.required = isRegister;
+            confirmPassword.required = isRegister;
+            terms.required = isRegister;
+            password.autocomplete = isRegister ? 'new-password' : 'current-password';
+            document.getElementById('formTitle').textContent = isRegister ? 'Create account' : 'Sign in';
+            document.getElementById('formSubtitle').textContent = isRegister ? 'Create a Trendy Store customer account.' : 'Sign in to your Trendy Store account.';
+            document.getElementById('submitButton').textContent = isRegister ? 'Create account' : 'Sign in';
+            document.getElementById('signInModeButton').setAttribute('aria-pressed', String(!isRegister));
+            document.getElementById('registerModeButton').setAttribute('aria-pressed', String(isRegister));
+            Object.values(errors).forEach((error) => { error.textContent = ''; });
+            successMessage.textContent = '';
+        }
+
+        [fullName, email, password, confirmPassword].forEach((field) => {
+            field.addEventListener('input', () => {
+                validateField(field.name);
+                if (field.name === 'password' || field.name === 'confirmPassword') {
+                    validateField('confirmPassword');
+                }
+            });
+        });
+
+        passwordToggles.forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.getAttribute('data-target');
+                const targetInput = document.getElementById(targetId);
+                const icon = toggle.querySelector('i');
+
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    targetInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        terms.addEventListener('change', () => validateField('terms'));
+
+        document.getElementById('signInModeButton').addEventListener('click', () => setAuthMode('login'));
+        document.getElementById('registerModeButton').addEventListener('click', () => setAuthMode('register'));
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            successMessage.textContent = '';
+
+            const isValid = [
+                authMode === 'register' ? validateField('fullName') : true,
+                validateField('email'),
+                validateField('password'),
+                authMode === 'register' ? validateField('confirmPassword') : true,
+                authMode === 'register' ? validateField('terms') : true
+            ].every(Boolean);
+
+            if (!isValid) return;
+
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            try {
+                const response = await fetch('./user-auth.php', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: authMode === 'register' ? 'register' : 'login',
+                        fullName: fullName.value.trim(),
+                        email: email.value.trim(),
+                        password: password.value
+                    })
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    successMessage.textContent = result.message || 'Could not complete the account request.';
+                    successMessage.style.color = '#c74b4b';
+                    return;
+                }
+
+                successMessage.style.color = '#2f8f56';
+                if (result.role === 'admin') {
+                    window.location.href = result.redirectUrl || './admin/index.php';
+                    return;
+                }
+                if (result.role === 'user') {
+                    if (result.user) {
+                        setLoginSuccessRedirect(result.user, authMode === 'register' ? 'Account created successfully.' : 'Login successful! Welcome back to Trendy Store.');
+                    } else {
+                        window.location.href = result.redirectUrl || './index.html';
+                    }
+                    return;
+                }
+                setLoginSuccessRedirect(result.user, authMode === 'register' ? 'Account created successfully.' : 'Login successful! Welcome back to Trendy Store.');
+            } catch (error) {
+                successMessage.textContent = 'The account service is unavailable. Start XAMPP and try again.';
+                successMessage.style.color = '#c74b4b';
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+
+        setAuthMode(authMode);
+    </script>
 </body>
 </html>

@@ -316,19 +316,9 @@
             setTimeout(() => { alertBox.style.display = 'none'; }, 2500);
         }
 
-        function getActiveCheckoutItems() {
-            const buyNowItems = JSON.parse(localStorage.getItem('buyNowItems') || '[]');
-            if (Array.isArray(buyNowItems) && buyNowItems.length) {
-                return buyNowItems;
-            }
-            const cartItems = getCart();
-            localStorage.setItem('buyNowItems', JSON.stringify(cartItems));
-            return cartItems;
-        }
-
         function calculateTotals() {
-            const items = getActiveCheckoutItems();
-            const subtotal = items.reduce((sum, item) => sum + Number(item.price || 0), 0);
+            const cart = getBuyNowItems();
+            const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
             const shippingSelect = document.getElementById('shipping');
             let shippingCost = 0;
             let shippingText = 'Free';
@@ -351,11 +341,11 @@
         }
 
         function renderCartItems() {
-            const items = getActiveCheckoutItems();
+            const cart = getBuyNowItems();
             const itemsList = document.getElementById('cartItemsList');
             itemsList.innerHTML = '';
 
-            if (!items.length) {
+            if (!cart.length) {
                 document.getElementById('cartEmptyMessage').style.display = 'block';
                 document.getElementById('checkoutSection').style.display = 'none';
                 return;
@@ -364,7 +354,7 @@
             document.getElementById('cartEmptyMessage').style.display = 'none';
             document.getElementById('checkoutSection').style.display = 'grid';
 
-            items.forEach(product => {
+            cart.forEach(product => {
                 const item = document.createElement('div');
                 item.className = 'mini-product';
                 item.innerHTML = `
@@ -378,7 +368,6 @@
                 itemsList.appendChild(item);
             });
 
-            localStorage.setItem('buyNowItems', JSON.stringify(items));
             calculateTotals();
         }
 
@@ -532,7 +521,9 @@
         }
 
         function getBuyNowItems() {
-            return getActiveCheckoutItems();
+            const buyNowItems = JSON.parse(localStorage.getItem('buyNowItems') || '[]');
+            if (buyNowItems && buyNowItems.length) return buyNowItems;
+            return getCart();
         }
 
         function getUpiLink() {
@@ -598,11 +589,17 @@
                 return;
             }
 
+            const itemsToOrder = getBuyNowItems();
+            if (!itemsToOrder.length) {
+                window.location.replace('./index.html');
+                return;
+            }
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
             const selectedOnlinePaymentType = paymentMethod === 'online' ? getSelectedOnlinePaymentType() : 'cod';
             const orderData = {
                 date: new Date().toISOString(),
-                items: getBuyNowItems(),
+                status: 'Order placed',
+                items: itemsToOrder,
                 delivery: {
                     name: document.getElementById('fullname').value,
                     email: document.getElementById('email').value,
@@ -617,6 +614,9 @@
                 shipping: document.getElementById('shipping').value,
                 paymentMethod,
                 onlinePaymentType: selectedOnlinePaymentType,
+                subtotal: document.getElementById('subtotal').textContent,
+                shippingCost: document.getElementById('shipping-cost').textContent,
+                tax: document.getElementById('tax').textContent,
                 total: document.getElementById('total').textContent
             };
 
@@ -624,7 +624,9 @@
             orders.push(orderData);
             localStorage.setItem('orders', JSON.stringify(orders));
 
-            localStorage.setItem('cart', JSON.stringify([]));
+            const orderedProductIds = new Set(itemsToOrder.filter((item) => item?.id !== undefined).map((item) => String(item.id)));
+            const remainingCart = getCart().filter((item) => item?.id === undefined || !orderedProductIds.has(String(item.id)));
+            localStorage.setItem('cart', JSON.stringify(remainingCart));
             localStorage.removeItem('buyNowItems');
             localStorage.removeItem('buyNowMode');
 
@@ -641,11 +643,17 @@
                 }
             }
 
+            if (!remainingCart.length) {
+                sessionStorage.setItem('orderSuccessMessage', 'Your order was placed successfully.');
+                window.location.replace('./index.html');
+                return;
+            }
+
             document.getElementById('successModal').classList.add('active');
         }
 
         function goHome() {
-            window.location.href = './index.html';
+            window.location.href = getCart().length ? './addtocard.html' : './index.html';
         }
 
         // Update shipping cost when selection changes
@@ -654,6 +662,10 @@
             const stateSelect = document.getElementById('state');
             const citySelect = document.getElementById('city');
             const areaSelect = document.getElementById('area');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+
+            document.getElementById('fullname').value = userProfile.fullName || '';
+            document.getElementById('email').value = userProfile.email || '';
 
             shippingSelect.addEventListener('change', () => {
                 clearFieldError('shipping');
@@ -746,8 +758,11 @@
 
             populateLocationSelectors();
             const cartItems = getBuyNowItems();
-            const savedCart = getCart();
-            localStorage.setItem('buyNowItems', JSON.stringify(cartItems.length ? cartItems : savedCart));
+            if (!cartItems.length) {
+                window.location.replace('./index.html');
+                return;
+            }
+            localStorage.setItem('buyNowItems', JSON.stringify(cartItems));
 
             renderCartItems();
             updatePaymentUI();
@@ -874,6 +889,5 @@
             return rulesMap[fieldId] || [];
         }
     </script>
-    <script src="./js/backend.js"></script>
 </body>
 </html>
