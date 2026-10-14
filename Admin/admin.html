@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Administration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <!-- ADMINISTRATIVE INTERFACE: separate from customer-facing HTML files. -->
+    <section id="adminLogin" class="auth-page">
+        <form id="adminLoginForm" class="auth-card auth-form" novalidate>
+            <a class="logo" href="../index.html">Trendy Store<span>.</span></a>
+            <p class="eyebrow">Administration</p>
+            <h1>Store control center</h1>
+            <p class="subtitle">Sign in to manage customers, products, and orders.</p>
+            <div class="form-group">
+                <label for="adminEmail">Administrator email</label>
+                <input id="adminEmail" type="email" autocomplete="username">
+                <div class="error-text" id="adminEmailError"></div>
+            </div>
+            <div class="form-group">
+                <label for="adminPassword">Password</label>
+                <div class="password-wrapper">
+                    <input id="adminPassword" type="password" placeholder="Enter admin password" autocomplete="current-password">
+                    <button type="button" class="password-toggle" data-target="adminPassword" aria-label="Show password"><i class="far fa-eye"></i></button>
+                </div>
+                <div class="error-text" id="adminPasswordError"></div>
+            </div>
+            <button class="primary-btn" type="submit"><i class="fas fa-lock"></i> Sign in</button>
+            <p class="form-footer"><a href="../index.html">Return to customer store</a></p>
+        </form>
+    </section>
+
+    <script src="./admin.js?v=admin-login-3"></script>
+</body>
+</html>

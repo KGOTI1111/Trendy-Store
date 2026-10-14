@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <header class="admin-topbar">
+        <a class="admin-brand" href="./index.php">Trendy Store<span> / Admin</span></a>
+        <nav class="admin-nav" aria-label="Admin navigation">
+            <a href="./index.php" aria-current="page">Overview</a>
+            <a href="./manageproduct.php">Products</a>
+            <a href="./manageusers.php">Users</a>
+            <a href="./manageorders.php">Orders</a>
+            <a href="./manageadmins.php">Admins</a>
+            <a href="../index.html">Storefront</a>
+            <a href="./logout.php">Sign out</a>
+        </nav>
+    </header>
+    <main class="admin-main">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">Operations</p>
+                <h1>Admin overview</h1>
+                <p>Manage the storefront catalog, account directory, and order status from one place.</p>
+            </div>
+        </div>
+        <p class="notice"><strong>Prototype data:</strong> Admin sign-in is checked against SQL, but catalog, user-directory, and order updates are still stored in this browser, not MySQL. User passwords are never shown. Production management needs authenticated server-side APIs.</p>
+        <section class="stat-grid" aria-label="Store totals">
+            <div class="stat"><span>Products</span><strong id="productCount">0</strong></div>
+            <div class="stat"><span>User records</span><strong id="userCount">0</strong></div>
+            <div class="stat"><span>Orders</span><strong id="orderCount">0</strong></div>
+        </section>
+        <section>
+            <div class="section-heading"><h2>Admin tasks</h2><span>Local browser data</span></div>
+            <div class="task-list">
+                <a class="task-link" href="./manageproduct.html">
+                    <span class="task-icon"><i class="fas fa-box-open" aria-hidden="true"></i></span>
+                    <span class="task-copy"><strong>Manage products</strong><span>Browse the active catalog, add products, edit details, or remove products from the storefront.</span></span>
+                    <span class="task-arrow"><i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                </a>
+                <a class="task-link" href="./manageusers.html">
+                    <span class="task-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+                    <span class="task-copy"><strong>Manage users</strong><span>Review and maintain non-secret user profile records captured by this browser.</span></span>
+                    <span class="task-arrow"><i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                </a>
+                <a class="task-link" href="./manageorders.html">
+                    <span class="task-icon"><i class="fas fa-truck" aria-hidden="true"></i></span>
+                    <span class="task-copy"><strong>Manage order status</strong><span>Update the status customers see in their order details. Order records remain read-only.</span></span>
+                    <span class="task-arrow"><i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                </a>
+            </div>
+        </section>
+    </main>
+    <script>
+        if (localStorage.getItem('storeProducts') === null) {
+            window.location.replace('../index.html?adminSetup=dashboard');
+        }
+
+        function readArray(key) {
+            try {
+                const value = JSON.parse(localStorage.getItem(key) || '[]');
+                return Array.isArray(value) ? value : [];
+            } catch (error) {
+                return [];
+            }
+        }
+        document.getElementById('productCount').textContent = readArray('storeProducts').length;
+        document.getElementById('userCount').textContent = readArray('storeUsers').length;
+        document.getElementById('orderCount').textContent = readArray('orders').length;
+    </script>
+</body>
+</html>

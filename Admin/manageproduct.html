@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Manage Products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <header class="admin-topbar">
+        <a class="admin-brand" href="./index.php">Trendy Store<span> / Admin</span></a>
+        <nav class="admin-nav" aria-label="Admin navigation">
+            <a href="./index.php">Overview</a>
+            <a href="./manageproduct.php" aria-current="page">Products</a>
+            <a href="./manageusers.php">Users</a>
+            <a href="./manageorders.php">Orders</a>
+            <a href="./manageadmins.php">Admins</a>
+            <a href="../index.html">Storefront</a>
+            <a href="./logout.php">Sign out</a>
+        </nav>
+    </header>
+    <main class="admin-main">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">Catalog</p>
+                <h1>Manage products</h1>
+                <p>Add, edit, or remove products. Saved changes update the storefront catalog.</p>
+            </div>
+        </div>
+        <p class="notice"><strong>Prototype data:</strong> Admin sign-in is checked against SQL, but product changes are stored in this browser, not MySQL. Use a protected server-side product API for a live store.</p>
+
+        <form class="editor" id="productForm">
+            <h2 id="formHeading">Add product</h2>
+            <input id="productId" type="hidden">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="productName">Product name</label>
+                    <input id="productName" name="name" type="text" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Category</label>
+                    <select id="productCategory" name="category" required>
+                        <option value="Watch">Watch</option>
+                        <option value="Goggles">Goggles</option>
+                        <option value="Perfume">Perfume</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price (INR)</label>
+                    <input id="productPrice" name="price" type="number" min="0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="productImage">Image URL or storefront path</label>
+                    <input id="productImage" name="image" type="text" placeholder="img/Watch/1/1.png" required>
+                </div>
+                <div class="form-group form-span">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" name="description" maxlength="1000"></textarea>
+                </div>
+                <div class="form-group form-span">
+                    <label for="productReview">Review text</label>
+                    <textarea id="productReview" name="review" maxlength="500"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="button" id="saveProductButton" type="submit"><i class="fas fa-plus" aria-hidden="true"></i> Add product</button>
+                <button class="button button-secondary" id="cancelEditButton" type="button" hidden>Cancel edit</button>
+                <button class="button button-secondary" id="resetProductForm" type="button">Clear</button>
+            </div>
+            <p class="inline-status" id="formMessage" aria-live="polite"></p>
+        </form>
+
+        <div class="toolbar">
+            <div>
+                <div class="section-heading"><h2>Store catalog</h2><span id="productCount">0 products</span></div>
+            </div>
+            <label>
+                <span class="sr-only">Search products</span>
+                <input class="search-input" id="productSearch" type="search" placeholder="Search products">
+            </label>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
+                <tbody id="productTableBody"></tbody>
+            </table>
+            <p class="empty-state" id="emptyProducts" hidden>No products match this search.</p>
+        </div>
+    </main>
+    <script>
+        const catalogKey = 'storeProducts';
+        const productForm = document.getElementById('productForm');
+        let products = [];
+
+        function readProducts() {
+            try {
+                const savedProducts = JSON.parse(localStorage.getItem(catalogKey) || '[]');
+                return Array.isArray(savedProducts) ? savedProducts : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function imageUrl(path) {
+            if (!path) return '';
+            if (/^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return path;
+            return new URL(`../${path.replace(/^\.\//, '')}`, window.location.href).href;
+        }
+
+        function formatPrice(amount) {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(amount) || 0);
+        }
+
+        function saveProducts() {
+            localStorage.setItem(catalogKey, JSON.stringify(products));
+            renderProducts();
+        }
+
+        function resetEditor() {
+            productForm.reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formHeading').textContent = 'Add product';
+            document.getElementById('saveProductButton').innerHTML = '<i class="fas fa-plus" aria-hidden="true"></i> Add product';
+            document.getElementById('cancelEditButton').hidden = true;
+        }
+
+        function editProduct(productId) {
+            const product = products.find((item) => String(item.id) === productId);
+            if (!product) return;
+            document.getElementById('productId').value = product.id;
+            document.getElementById('productName').value = product.name || '';
+            document.getElementById('productCategory').value = product.category || 'Watch';
+            document.getElementById('productPrice').value = product.price ?? '';
+            document.getElementById('productImage').value = product.img || '';
+            document.getElementById('productDescription').value = product.desc || '';
+            document.getElementById('productReview').value = product.review || '';
+            document.getElementById('formHeading').textContent = 'Edit product';
+            document.getElementById('saveProductButton').innerHTML = '<i class="fas fa-check" aria-hidden="true"></i> Save product';
+            document.getElementById('cancelEditButton').hidden = false;
+            document.getElementById('productName').focus();
+            productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function deleteProduct(productId) {
+            const product = products.find((item) => String(item.id) === productId);
+            if (!product || !window.confirm(`Remove ${product.name} from the storefront?`)) return;
+            products = products.filter((item) => String(item.id) !== productId);
+            saveProducts();
+            if (document.getElementById('productId').value === productId) resetEditor();
+        }
+
+        function renderProducts() {
+            const tableBody = document.getElementById('productTableBody');
+            const query = document.getElementById('productSearch').value.trim().toLowerCase();
+            const visibleProducts = products.filter((product) => `${product.name} ${product.category}`.toLowerCase().includes(query));
+            tableBody.replaceChildren();
+            document.getElementById('productCount').textContent = `${products.length} products`;
+            document.getElementById('emptyProducts').hidden = visibleProducts.length > 0;
+
+            visibleProducts.forEach((product) => {
+                const row = document.createElement('tr');
+                const productCell = document.createElement('td');
+                const productSummary = document.createElement('div');
+                productSummary.className = 'table-product';
+                const image = document.createElement('img');
+                image.src = imageUrl(product.img);
+                image.alt = '';
+                image.addEventListener('error', () => { image.hidden = true; }, { once: true });
+                const text = document.createElement('div');
+                const name = document.createElement('strong');
+                name.textContent = product.name || 'Untitled product';
+                const id = document.createElement('span');
+                id.textContent = `ID ${product.id}`;
+                text.append(name, id);
+                productSummary.append(image, text);
+                productCell.appendChild(productSummary);
+
+                const categoryCell = document.createElement('td');
+                categoryCell.textContent = product.category || 'Uncategorized';
+                const priceCell = document.createElement('td');
+                priceCell.textContent = formatPrice(product.price);
+                const actionCell = document.createElement('td');
+                const actions = document.createElement('div');
+                actions.className = 'row-actions';
+                const editButton = document.createElement('button');
+                editButton.className = 'button button-secondary';
+                editButton.type = 'button';
+                editButton.textContent = 'Edit';
+                editButton.addEventListener('click', () => editProduct(String(product.id)));
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'button button-danger';
+                deleteButton.type = 'button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteProduct(String(product.id)));
+                actions.append(editButton, deleteButton);
+                actionCell.appendChild(actions);
+                row.append(productCell, categoryCell, priceCell, actionCell);
+                tableBody.appendChild(row);
+            });
+        }
+
+        productForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!productForm.reportValidity()) return;
+            const productId = document.getElementById('productId').value;
+            const currentProduct = products.find((item) => String(item.id) === productId);
+            const image = document.getElementById('productImage').value.trim();
+            const product = {
+                ...(currentProduct || {}),
+                id: currentProduct ? currentProduct.id : Math.max(0, ...products.map((item) => Number(item.id) || 0)) + 1,
+                name: document.getElementById('productName').value.trim(),
+                category: document.getElementById('productCategory').value,
+                price: Number(document.getElementById('productPrice').value),
+                img: image,
+                desc: document.getElementById('productDescription').value.trim(),
+                review: document.getElementById('productReview').value.trim(),
+                sales: currentProduct?.sales || '0',
+                rating: currentProduct?.rating || 'New',
+                gallery: currentProduct?.img === image && Array.isArray(currentProduct.gallery) ? currentProduct.gallery : [image]
+            };
+            if (currentProduct) {
+                products = products.map((item) => item === currentProduct ? product : item);
+            } else {
+                products = [...products, product];
+            }
+            saveProducts();
+            document.getElementById('formMessage').textContent = currentProduct ? 'Product updated.' : 'Product added.';
+            resetEditor();
+        });
+
+        document.getElementById('cancelEditButton').addEventListener('click', resetEditor);
+        document.getElementById('resetProductForm').addEventListener('click', resetEditor);
+        document.getElementById('productSearch').addEventListener('input', renderProducts);
+        window.addEventListener('storage', (event) => {
+            if (event.key === catalogKey) {
+                products = readProducts();
+                renderProducts();
+            }
+        });
+
+        if (localStorage.getItem(catalogKey) === null) {
+            window.location.replace('../index.html?adminSetup=catalog');
+        } else {
+            products = readProducts();
+            renderProducts();
+        }
+    </script>
+</body>
+</html>

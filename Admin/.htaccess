@@ -1,0 +1,4 @@
+Options -Indexes
+DirectoryIndex login.php
+RewriteEngine On
+RewriteRule ^(index|manageproduct|manageusers|manageorders)\.html$ $1.php [L,NC]

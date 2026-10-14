@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Manage Order Status</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <header class="admin-topbar">
+        <a class="admin-brand" href="./index.php">Trendy Store<span> / Admin</span></a>
+        <nav class="admin-nav" aria-label="Admin navigation">
+            <a href="./index.php">Overview</a>
+            <a href="./manageproduct.php">Products</a>
+            <a href="./manageusers.php">Users</a>
+            <a href="./manageorders.php" aria-current="page">Orders</a>
+            <a href="./manageadmins.php">Admins</a>
+            <a href="../index.html">Storefront</a>
+            <a href="./logout.php">Sign out</a>
+        </nav>
+    </header>
+    <main class="admin-main">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">Fulfillment</p>
+                <h1>Manage order status</h1>
+                <p>Update only the status shown to customers. Order contents and totals are read-only.</p>
+            </div>
+        </div>
+        <p class="notice"><strong>Prototype data:</strong> Admin sign-in is checked against SQL, but order statuses are still stored in this browser, not MySQL. Use a protected server-side order API for a live store.</p>
+        <div class="toolbar">
+            <div class="section-heading"><h2>Orders</h2><span id="orderCount">0 orders</span></div>
+            <label><span class="sr-only">Search orders</span><input class="search-input" id="orderSearch" type="search" placeholder="Search order, customer, or product"></label>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Order</th><th>Customer</th><th>Products</th><th>Total</th><th>Status</th></tr></thead>
+                <tbody id="orderTableBody"></tbody>
+            </table>
+            <p class="empty-state" id="emptyOrders" hidden>No orders match this search.</p>
+        </div>
+        <p class="inline-status" id="orderMessage" aria-live="polite"></p>
+    </main>
+    <script>
+        const orderStatuses = ['Order placed', 'Processing', 'Shipped', 'Out for delivery', 'Delivered', 'Cancelled'];
+        const orderTableBody = document.getElementById('orderTableBody');
+        let orders = readOrders();
+
+        function readOrders() {
+            try {
+                const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                return Array.isArray(savedOrders) ? savedOrders : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function renderOrders() {
+            const query = document.getElementById('orderSearch').value.trim().toLowerCase();
+            const visibleOrders = orders.map((order, index) => ({ order, index })).filter(({ order, index }) => {
+                const delivery = order.delivery || {};
+                const products = (Array.isArray(order.items) ? order.items : []).map((item) => item.name || '').join(' ');
+                return `order ${index + 1} ${delivery.name || ''} ${delivery.email || ''} ${products}`.toLowerCase().includes(query);
+            });
+            orderTableBody.replaceChildren();
+            document.getElementById('orderCount').textContent = `${orders.length} orders`;
+            document.getElementById('emptyOrders').hidden = visibleOrders.length > 0;
+
+            visibleOrders.forEach(({ order, index }) => {
+                const row = document.createElement('tr');
+                const orderCell = document.createElement('td');
+                const orderDate = order.date ? new Date(order.date) : null;
+                const dateText = orderDate && !Number.isNaN(orderDate.getTime()) ? orderDate.toLocaleDateString() : 'Date unavailable';
+                orderCell.textContent = `Order ${index + 1} | ${dateText}`;
+                const customerCell = document.createElement('td');
+                customerCell.textContent = `${order.delivery?.name || 'Unknown'}${order.delivery?.email ? ` (${order.delivery.email})` : ''}`;
+                const productsCell = document.createElement('td');
+                productsCell.textContent = (Array.isArray(order.items) ? order.items : []).map((item) => item.name || 'Product').join(', ') || 'No items';
+                const totalCell = document.createElement('td');
+                totalCell.textContent = order.total || 'Unavailable';
+                const statusCell = document.createElement('td');
+                const statusSelect = document.createElement('select');
+                statusSelect.className = 'status-select';
+                statusSelect.setAttribute('aria-label', `Status for order ${index + 1}`);
+                const savedStatus = order.status || 'Order placed';
+                const choices = orderStatuses.includes(savedStatus) ? orderStatuses : [...orderStatuses, savedStatus];
+                choices.forEach((status) => {
+                    const option = document.createElement('option');
+                    option.value = status;
+                    option.textContent = status;
+                    option.selected = status === savedStatus;
+                    statusSelect.appendChild(option);
+                });
+                statusSelect.addEventListener('change', () => updateOrderStatus(index, statusSelect.value));
+                statusCell.appendChild(statusSelect);
+                row.append(orderCell, customerCell, productsCell, totalCell, statusCell);
+                orderTableBody.appendChild(row);
+            });
+        }
+
+        function updateOrderStatus(index, status) {
+            orders[index] = { ...orders[index], status };
+            localStorage.setItem('orders', JSON.stringify(orders));
+            document.getElementById('orderMessage').textContent = `Order ${index + 1} status updated to ${status}.`;
+        }
+
+        document.getElementById('orderSearch').addEventListener('input', renderOrders);
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'orders') {
+                orders = readOrders();
+                renderOrders();
+            }
+        });
+        renderOrders();
+    </script>
+</body>
+</html>

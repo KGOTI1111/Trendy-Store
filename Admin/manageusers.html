@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trendy Store | Manage Users</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <header class="admin-topbar">
+        <a class="admin-brand" href="./index.php">Trendy Store<span> / Admin</span></a>
+        <nav class="admin-nav" aria-label="Admin navigation">
+            <a href="./index.php">Overview</a>
+            <a href="./manageproduct.php">Products</a>
+            <a href="./manageusers.php" aria-current="page">Users</a>
+            <a href="./manageorders.php">Orders</a>
+            <a href="./manageadmins.php">Admins</a>
+            <a href="../index.html">Storefront</a>
+            <a href="./logout.php">Sign out</a>
+        </nav>
+    </header>
+    <main class="admin-main">
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">Accounts</p>
+                <h1>Manage users</h1>
+                <p>Maintain the non-secret user directory recorded by this browser.</p>
+            </div>
+        </div>
+        <p class="notice"><strong>Privacy and security:</strong> Passwords are never shown or copied into the user directory. User CRUD is still stored in this browser, not MySQL; adding a directory record does not create a login account.</p>
+
+        <form class="editor" id="createUserForm">
+            <h2>Add user record</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="newUserName">Full name</label>
+                    <input id="newUserName" type="text" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="newUserEmail">Email address</label>
+                    <input id="newUserEmail" type="email" required maxlength="254">
+                </div>
+            </div>
+            <div class="form-actions"><button class="button" type="submit"><i class="fas fa-user-plus" aria-hidden="true"></i> Add user</button></div>
+            <p class="inline-status" id="userMessage" aria-live="polite"></p>
+        </form>
+
+        <div class="toolbar">
+            <div class="section-heading"><h2>User directory</h2><span id="userCount">0 records</span></div>
+            <label><span class="sr-only">Search users</span><input class="search-input" id="userSearch" type="search" placeholder="Search by name or email"></label>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>User</th><th>Created</th><th>Last login</th><th>Actions</th></tr></thead>
+                <tbody id="userTableBody"></tbody>
+            </table>
+            <p class="empty-state" id="emptyUsers" hidden>No user records match this search.</p>
+        </div>
+    </main>
+
+    <dialog id="editUserDialog" aria-labelledby="editUserHeading">
+        <form class="dialog-content" id="editUserForm">
+            <h2 id="editUserHeading">Edit user record</h2>
+            <input id="editUserId" type="hidden">
+            <div class="form-group">
+                <label for="editUserName">Full name</label>
+                <input id="editUserName" type="text" required maxlength="100">
+            </div>
+            <div class="form-group" style="margin-top: 14px;">
+                <label for="editUserEmail">Email address</label>
+                <input id="editUserEmail" type="email" required maxlength="254">
+            </div>
+            <p class="inline-status" id="editUserMessage" aria-live="polite"></p>
+            <div class="dialog-actions">
+                <button class="button button-secondary" id="cancelEditUser" type="button">Cancel</button>
+                <button class="button" type="submit">Save changes</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        const usersKey = 'storeUsers';
+        const userTableBody = document.getElementById('userTableBody');
+        const editUserDialog = document.getElementById('editUserDialog');
+        let users = readUsers();
+
+        function readUsers() {
+            try {
+                const savedUsers = JSON.parse(localStorage.getItem(usersKey) || '[]');
+                return Array.isArray(savedUsers) ? savedUsers : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveUsers() {
+            localStorage.setItem(usersKey, JSON.stringify(users));
+            renderUsers();
+            window.dispatchEvent(new StorageEvent('storage', { key: usersKey, newValue: JSON.stringify(users) }));
+        }
+
+        function normalizeEmail(email) {
+            return email.trim().toLowerCase();
+        }
+
+        function makeUserRecord(fullName, email, existing = {}) {
+            const now = new Date().toISOString();
+            return {
+                ...existing,
+                id: existing.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                fullName: fullName.trim(),
+                email: email.trim(),
+                createdAt: existing.createdAt || now,
+                lastLogin: existing.lastLogin || ''
+            };
+        }
+
+        function dateLabel(value) {
+            if (!value) return 'Not recorded';
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? 'Not recorded' : date.toLocaleDateString();
+        }
+
+        function renderUsers() {
+            const query = document.getElementById('userSearch').value.trim().toLowerCase();
+            const filteredUsers = users.filter((user) => `${user.fullName} ${user.email}`.toLowerCase().includes(query));
+            userTableBody.replaceChildren();
+            document.getElementById('userCount').textContent = `${users.length} records`;
+            document.getElementById('emptyUsers').hidden = filteredUsers.length > 0;
+
+            filteredUsers.forEach((user) => {
+                const row = document.createElement('tr');
+                const identityCell = document.createElement('td');
+                const identity = document.createElement('div');
+                const name = document.createElement('strong');
+                name.textContent = user.fullName || 'Unnamed user';
+                const email = document.createElement('span');
+                email.className = 'order-date';
+                email.textContent = user.email || 'Email unavailable';
+                identity.append(name, email);
+                identityCell.appendChild(identity);
+                const createdCell = document.createElement('td');
+                createdCell.textContent = dateLabel(user.createdAt);
+                const loginCell = document.createElement('td');
+                loginCell.textContent = dateLabel(user.lastLogin);
+                const actionsCell = document.createElement('td');
+                const actions = document.createElement('div');
+                actions.className = 'row-actions';
+                const editButton = document.createElement('button');
+                editButton.className = 'button button-secondary';
+                editButton.type = 'button';
+                editButton.textContent = 'Edit';
+                editButton.addEventListener('click', () => openEditDialog(user));
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'button button-danger';
+                deleteButton.type = 'button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteUser(user));
+                actions.append(editButton, deleteButton);
+                actionsCell.appendChild(actions);
+                row.append(identityCell, createdCell, loginCell, actionsCell);
+                userTableBody.appendChild(row);
+            });
+        }
+
+        function openEditDialog(user) {
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUserName').value = user.fullName || '';
+            document.getElementById('editUserEmail').value = user.email || '';
+            document.getElementById('editUserMessage').textContent = '';
+            editUserDialog.showModal();
+        }
+
+        function deleteUser(user) {
+            if (!window.confirm(`Remove the directory record for ${user.fullName}?`)) return;
+            users = users.filter((item) => item.id !== user.id);
+            const activeProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (normalizeEmail(activeProfile.email || '') === normalizeEmail(user.email || '')) {
+                localStorage.removeItem('userProfile');
+            }
+            saveUsers();
+            document.getElementById('userMessage').textContent = 'User record removed.';
+        }
+
+        document.getElementById('createUserForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const fullName = document.getElementById('newUserName').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            if (users.some((user) => normalizeEmail(user.email) === normalizeEmail(email))) {
+                document.getElementById('userMessage').textContent = 'A user record with this email already exists.';
+                return;
+            }
+            users.push(makeUserRecord(fullName, email));
+            saveUsers();
+            event.currentTarget.reset();
+            document.getElementById('userMessage').textContent = 'User record added. This does not create a password or grant secure login access.';
+        });
+
+        document.getElementById('editUserForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const userId = document.getElementById('editUserId').value;
+            const user = users.find((item) => item.id === userId);
+            if (!user) return;
+            const fullName = document.getElementById('editUserName').value.trim();
+            const email = document.getElementById('editUserEmail').value.trim();
+            if (users.some((item) => item.id !== userId && normalizeEmail(item.email) === normalizeEmail(email))) {
+                document.getElementById('editUserMessage').textContent = 'A user record with this email already exists.';
+                return;
+            }
+            const oldEmail = user.email;
+            users = users.map((item) => item.id === userId ? makeUserRecord(fullName, email, item) : item);
+            const activeProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            if (normalizeEmail(activeProfile.email || '') === normalizeEmail(oldEmail || '')) {
+                activeProfile.fullName = fullName;
+                activeProfile.email = email;
+                localStorage.setItem('userProfile', JSON.stringify(activeProfile));
+            }
+            saveUsers();
+            editUserDialog.close();
+            document.getElementById('userMessage').textContent = 'User record updated.';
+        });
+
+        document.getElementById('cancelEditUser').addEventListener('click', () => editUserDialog.close());
+        document.getElementById('userSearch').addEventListener('input', renderUsers);
+        window.addEventListener('storage', (event) => {
+            if (event.key === usersKey) {
+                users = readUsers();
+                renderUsers();
+            }
+        });
+
+        const currentProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        if (currentProfile.fullName && currentProfile.email && !users.some((user) => normalizeEmail(user.email) === normalizeEmail(currentProfile.email))) {
+            users.push(makeUserRecord(currentProfile.fullName, currentProfile.email, { lastLogin: new Date().toISOString() }));
+            localStorage.setItem(usersKey, JSON.stringify(users));
+        }
+        renderUsers();
+    </script>
+</body>
+</html>
